@@ -4,7 +4,7 @@ pkgrel=1
 pkgdesc="Claude Desktop Client (Stable Release Channel)"
 arch=('x86_64')
 url="https://claude.com/download"
-license=('custom:proprietary')
+license=('LicenseRef-proprietary')
 
 depends=('nss' 'atk' 'at-spi2-core' 'libxss' 'gtk3' 'alsa-lib' 'libsecret')
 
