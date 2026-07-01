@@ -6,7 +6,32 @@ arch=('x86_64')
 url="https://claude.com/download"
 license=('LicenseRef-proprietary')
 
-depends=('nss' 'atk' 'at-spi2-core' 'libxss' 'gtk3' 'alsa-lib' 'libsecret')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcap-ng'
+  'libcups'
+  'libseccomp'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+)
 
 optdepends=(
   'nodejs: Core runtime layer to execute JavaScript/TypeScript MCP extensions'
