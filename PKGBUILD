@@ -1,3 +1,5 @@
+# Maintainer: marcelvdh <marcelvdh@linux.com>
+
 pkgname=claude-desktop-official
 pkgver=1.17377.1
 pkgrel=1
