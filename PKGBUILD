@@ -47,7 +47,7 @@ source=("https://downloads.claude.ai/claude-desktop/apt/${_channel}/pool/main/c/
 sha512sums=('a904d685159df206d9a07b0ec102c64f0532243b04d0da755efdee9c8d4dae75ef3cc065f6fef6641a7e228a5291b734b0a870867ddbab447e31e35f578eed17')
 
 package() {
-	bsdtar -xf "claude-desktop_${pkgver}_amd64.deb" -C "$srcdir"
+	bsdtar -xf "$srcdir/claude-desktop_${pkgver}_amd64.deb" -C "$srcdir"
 
 	bsdtar -xf "$srcdir"/data.tar.* -C "$pkgdir/"
 
