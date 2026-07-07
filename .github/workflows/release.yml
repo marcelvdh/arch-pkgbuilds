@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,7 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download built package
         uses: actions/download-artifact@v4
         with:
@@ -25,12 +30,11 @@ jobs:
           path: dist
 
       - name: Create release and upload package
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          gh release create "${GITHUB_REF_NAME}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --title "${GITHUB_REF_NAME}" \
-            --generate-notes \
-            dist/*.pkg.tar.zst
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="v$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
+            --generate-notes dist/*.pkg.tar.zst
