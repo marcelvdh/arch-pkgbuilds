@@ -1,22 +1,14 @@
 name: Nightly update
 
-# Every evening: check Anthropic's APT repo for a newer claude-desktop release.
-# If found, bump the PKGBUILD, refresh checksums, regenerate .SRCINFO, build to
-# validate, and open a pull request. A human reviews and merges.
-#
-# If anything fails, a tracking issue is opened so the breakage is not silent.
-
 on:
   push:
-    branches: [ci/nightly-autoupdate]   # TEMP: branch testing; remove before merging
+    branches: [ci/nightly-autoupdate]   # TEMP: for branch testing, remove before merging
   schedule:
-    # 23:00 UTC daily. GitHub cron is UTC and does NOT follow DST, so this is
-    # 23:00 in London during winter (GMT) and 00:00 during summer (BST).
-    - cron: '0 23 * * *'
+    - cron: '0 23 * * *'                # 23:00 UTC (23:00 GMT / 00:00 BST in London)
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Detect and build, but do not commit/push or open a PR
+        description: Build but do not open a PR
         type: boolean
         default: false
 
@@ -27,7 +19,6 @@ permissions:
 
 concurrency:
   group: nightly-update
-  cancel-in-progress: false
 
 jobs:
   update:
@@ -41,7 +32,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Prepare unprivileged build user
+      - name: Prepare build user
         run: |
           useradd -m builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
@@ -50,105 +41,67 @@ jobs:
       - name: Detect versions
         id: detect
         run: |
-          set -euo pipefail
           current="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
           latest="$(bash scripts/latest-version.sh)"
           echo "current=$current" >> "$GITHUB_OUTPUT"
-          echo "latest=$latest"   >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
           echo "Current: $current   Latest: $latest"
-          highest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
-          if [[ "$current" != "$latest" && "$highest" == "$latest" ]]; then
-            echo "update_available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "update_available=false" >> "$GITHUB_OUTPUT"
-            echo "Already up to date."
-          fi
 
       - name: Decide what to do
         id: guard
-        if: steps.detect.outputs.update_available == 'true'
-        # DRY: true for branch-test pushes and for dispatch with dry_run=true.
-        # In dry mode we build to validate but never commit/push or open a PR.
         env:
-          DRY: ${{ github.event_name == 'push' || github.event.inputs.dry_run == 'true' }}
+          current: ${{ steps.detect.outputs.current }}
+          latest: ${{ steps.detect.outputs.latest }}
+          dry: ${{ github.event_name == 'push' || github.event.inputs.dry_run == 'true' }}
         run: |
-          set -euo pipefail
-          branch="autoupdate/${{ steps.detect.outputs.latest }}"
+          branch="autoupdate/$latest"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
-          if [[ "$DRY" == "true" ]]; then
-            echo "Dry run: will build but not open a PR."
-            echo "do_build=true" >> "$GITHUB_OUTPUT"
-            echo "do_pr=false"   >> "$GITHUB_OUTPUT"
+          newest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
+          if [[ "$current" == "$latest" || "$newest" != "$latest" ]]; then
+            echo "Already up to date."
+          elif [[ "$dry" == "true" ]]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
           elif git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
             echo "Branch $branch already exists; skipping."
-            echo "do_build=false" >> "$GITHUB_OUTPUT"
-            echo "do_pr=false"    >> "$GITHUB_OUTPUT"
           else
-            echo "do_build=true" >> "$GITHUB_OUTPUT"
-            echo "do_pr=true"    >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "pr=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Bump, refresh checksums, regenerate .SRCINFO, build
-        if: steps.guard.outputs.do_build == 'true'
-        run: |
-          sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && set -euo pipefail && \
-            export SRCINFO_CHECK=0 && \
-            sed -i -E 's/^pkgver=.*/pkgver=${{ steps.detect.outputs.latest }}/' PKGBUILD && \
-            sed -i -E 's/^pkgrel=.*/pkgrel=1/' PKGBUILD && \
-            updpkgsums && \
-            bash scripts/build.sh"
+      - name: Bump and build
+        if: steps.guard.outputs.build == 'true'
+        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/bump.sh '${{ steps.detect.outputs.latest }}'"
 
       - name: Open pull request
-        if: steps.guard.outputs.do_pr == 'true'
+        if: steps.guard.outputs.pr == 'true'
+        env:
+          branch: ${{ steps.guard.outputs.branch }}
+          old: ${{ steps.detect.outputs.current }}
+          new: ${{ steps.detect.outputs.latest }}
         run: |
-          set -euo pipefail
-          branch="${{ steps.guard.outputs.branch }}"
-          old="${{ steps.detect.outputs.current }}"
-          new="${{ steps.detect.outputs.latest }}"
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git add PKGBUILD .SRCINFO
-          git commit -m "chore: update to ${new}"
+          git commit -m "Update to $new"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push -u origin "$branch"
-          gh pr create \
-            --title "Update to ${new}" \
-            --body "Automated nightly update.
-
-          | | version |
-          |---|---|
-          | old | \`${old}\` |
-          | new | \`${new}\` |
-
-          Checksums refreshed via \`updpkgsums\`, \`.SRCINFO\` regenerated, and the package built successfully in CI. See the run artifact for the built \`*.pkg.tar.zst\`.
-
-          <sub>Note: because this PR is opened by \`GITHUB_TOKEN\`, the \`Build\` workflow will not re-run on it automatically. The package was already built and validated in this run.</sub>" \
-            --base main \
-            --head "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Update to $new" \
+            --body "Automated update from $old to $new."
 
       - name: Upload built package
-        if: steps.guard.outputs.do_build == 'true'
+        if: steps.guard.outputs.build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: claude-desktop-official-${{ steps.detect.outputs.latest }}
           path: ${{ github.workspace }}/*.pkg.tar.zst
           if-no-files-found: error
 
-      - name: Open tracking issue on failure
+      - name: Report failure
         if: failure()
         run: |
-          set -euo pipefail
           title="Nightly update failed on $(date -u +%Y-%m-%d)"
-          # Dedupe: don't stack duplicate issues for the same day.
-          if gh issue list --state open --search "$title in:title" | grep -q .; then
-            echo "Issue already open; not creating a duplicate."
-            exit 0
-          fi
-          gh issue create \
-            --title "$title" \
-            --body "The nightly update workflow failed. See the run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
-            --label "automation" || \
-          gh issue create \
-            --title "$title" \
-            --body "The nightly update workflow failed. See the run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          gh issue list --state open --search "$title in:title" | grep -q . \
+            || gh issue create --title "$title" --body "The nightly update failed: $run_url"

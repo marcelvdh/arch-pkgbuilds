@@ -1,11 +1,5 @@
 name: Build
 
-# Builds the package in an Arch Linux container, lints it, checks that .SRCINFO
-# is in sync, and uploads the resulting *.pkg.tar.zst as a workflow artifact.
-#
-# Runs on every PR and push to main (the CI gate), and is also callable from
-# other workflows via workflow_call (used by release.yml).
-
 on:
   pull_request:
   push:
@@ -35,7 +29,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Prepare unprivileged build user
+      - name: Prepare build user
         run: |
           useradd -m builder
           chown -R builder:builder "$GITHUB_WORKSPACE"

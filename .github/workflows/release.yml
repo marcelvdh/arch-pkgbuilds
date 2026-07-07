@@ -1,12 +1,5 @@
 name: Release
 
-# When a version tag (v*) is pushed, build the package and attach the
-# *.pkg.tar.zst to a GitHub Release. While the AUR is closed, this lets users
-# install directly:  sudo pacman -U <release-asset-url>
-#
-# Typical flow: merge a nightly update PR, then tag the merge commit, e.g.
-#   git tag v1.18286.2 && git push origin v1.18286.2
-
 on:
   push:
     tags:
