@@ -9,6 +9,10 @@ on:
         description: Build but do not open a PR
         type: boolean
         default: true
+      force:
+        description: Proceed even if already up to date (bumps pkgrel to force a testable PR)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -51,48 +55,53 @@ jobs:
           current: ${{ steps.detect.outputs.current }}
           latest: ${{ steps.detect.outputs.latest }}
           dry: ${{ github.event.inputs.dry_run == 'true' }}
+          force: ${{ github.event.inputs.force == 'true' }}
         run: |
-          branch="autoupdate/$latest"
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
           newest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
-          if [[ "$current" == "$latest" || "$newest" != "$latest" ]]; then
-            echo "Already up to date."
-          elif [[ "$dry" == "true" ]]; then
-            echo "build=true" >> "$GITHUB_OUTPUT"
-          elif git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
-            echo "Branch $branch already exists; skipping."
+          if [[ "$current" != "$latest" && "$newest" == "$latest" ]]; then
+            pkgver="$latest"; pkgrel=1; branch="autoupdate/$latest"; title="Update to $latest"
+          elif [[ "$force" == "true" ]]; then
+            pkgver="$current"; pkgrel="$GITHUB_RUN_NUMBER"
+            branch="force-test/$current-$GITHUB_RUN_NUMBER"; title="Force test build $current-$GITHUB_RUN_NUMBER"
           else
-            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "Already up to date."; exit 0
+          fi
+          {
+            echo "pkgver=$pkgver"; echo "pkgrel=$pkgrel"
+            echo "branch=$branch"; echo "title=$title"; echo "build=true"
+          } >> "$GITHUB_OUTPUT"
+          if [[ "$dry" == "true" ]]; then
+            echo "Dry run: building only, no PR."
+          elif [[ "$branch" == autoupdate/* ]] && git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo "Branch $branch already exists; skipping PR."
+          else
             echo "pr=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Bump and build
         if: steps.guard.outputs.build == 'true'
-        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/bump.sh '${{ steps.detect.outputs.latest }}'"
+        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/bump.sh '${{ steps.guard.outputs.pkgver }}' '${{ steps.guard.outputs.pkgrel }}'"
 
       - name: Open pull request
         if: steps.guard.outputs.pr == 'true'
         env:
           branch: ${{ steps.guard.outputs.branch }}
-          old: ${{ steps.detect.outputs.current }}
-          new: ${{ steps.detect.outputs.latest }}
+          title: ${{ steps.guard.outputs.title }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git add PKGBUILD .SRCINFO
-          git commit -m "Update to $new"
+          git commit -m "$title"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push -u origin "$branch"
-          gh pr create --base main --head "$branch" \
-            --title "Update to $new" \
-            --body "Automated update from $old to $new."
+          gh pr create --base main --head "$branch" --title "$title" --body "$title"
 
       - name: Upload built package
         if: steps.guard.outputs.build == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: claude-desktop-official-${{ steps.detect.outputs.latest }}
+          name: claude-desktop-official-${{ steps.guard.outputs.pkgver }}-${{ steps.guard.outputs.pkgrel }}
           path: ${{ github.workspace }}/*.pkg.tar.zst
           if-no-files-found: error
 
