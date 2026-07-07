@@ -8,9 +8,12 @@
 # Produces: ./*.pkg.tar.zst in the current directory.
 set -euo pipefail
 
-echo "::group::Regenerate and check .SRCINFO"
+# SRCINFO_CHECK=1 (default): fail if the committed .SRCINFO drifts from PKGBUILD
+#   (the CI gate). SRCINFO_CHECK=0: just (re)write it — used by the update flow,
+#   which intentionally changes PKGBUILD and regenerates .SRCINFO.
+echo "::group::Regenerate .SRCINFO"
 makepkg --printsrcinfo > .SRCINFO.new
-if [[ -f .SRCINFO ]] && ! diff -u .SRCINFO .SRCINFO.new; then
+if [[ "${SRCINFO_CHECK:-1}" == "1" && -f .SRCINFO ]] && ! diff -u .SRCINFO .SRCINFO.new; then
   echo "::error::.SRCINFO is out of sync with PKGBUILD. Run: makepkg --printsrcinfo > .SRCINFO"
   rm -f .SRCINFO.new
   exit 1

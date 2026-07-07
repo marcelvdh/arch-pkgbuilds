@@ -92,6 +92,7 @@ jobs:
         if: steps.guard.outputs.do_build == 'true'
         run: |
           sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && set -euo pipefail && \
+            export SRCINFO_CHECK=0 && \
             sed -i -E 's/^pkgver=.*/pkgver=${{ steps.detect.outputs.latest }}/' PKGBUILD && \
             sed -i -E 's/^pkgrel=.*/pkgrel=1/' PKGBUILD && \
             updpkgsums && \
