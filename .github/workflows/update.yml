@@ -1,0 +1,136 @@
+name: Nightly update
+
+# Every evening: check Anthropic's APT repo for a newer claude-desktop release.
+# If found, bump the PKGBUILD, refresh checksums, regenerate .SRCINFO, build to
+# validate, and open a pull request. A human reviews and merges.
+#
+# If anything fails, a tracking issue is opened so the breakage is not silent.
+
+on:
+  schedule:
+    # 23:00 UTC daily. GitHub cron is UTC and does NOT follow DST, so this is
+    # 23:00 in London during winter (GMT) and 00:00 during summer (BST).
+    - cron: '0 23 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: nightly-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Install toolchain
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare unprivileged build user
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Detect versions
+        id: detect
+        run: |
+          set -euo pipefail
+          current="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+          latest="$(bash scripts/latest-version.sh)"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest"   >> "$GITHUB_OUTPUT"
+          echo "Current: $current   Latest: $latest"
+          highest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
+          if [[ "$current" != "$latest" && "$highest" == "$latest" ]]; then
+            echo "update_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "update_available=false" >> "$GITHUB_OUTPUT"
+            echo "Already up to date."
+          fi
+
+      - name: Skip if branch/PR already exists
+        id: guard
+        if: steps.detect.outputs.update_available == 'true'
+        run: |
+          set -euo pipefail
+          branch="autoupdate/${{ steps.detect.outputs.latest }}"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo "Branch $branch already exists; skipping."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump, refresh checksums, regenerate .SRCINFO, build
+        if: steps.guard.outputs.proceed == 'true'
+        run: |
+          sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && set -euo pipefail && \
+            sed -i -E 's/^pkgver=.*/pkgver=${{ steps.detect.outputs.latest }}/' PKGBUILD && \
+            sed -i -E 's/^pkgrel=.*/pkgrel=1/' PKGBUILD && \
+            updpkgsums && \
+            bash scripts/build.sh"
+
+      - name: Open pull request
+        if: steps.guard.outputs.proceed == 'true'
+        run: |
+          set -euo pipefail
+          branch="${{ steps.guard.outputs.branch }}"
+          old="${{ steps.detect.outputs.current }}"
+          new="${{ steps.detect.outputs.latest }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add PKGBUILD .SRCINFO
+          git commit -m "chore: update to ${new}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -u origin "$branch"
+          gh pr create \
+            --title "Update to ${new}" \
+            --body "Automated nightly update.
+
+          | | version |
+          |---|---|
+          | old | \`${old}\` |
+          | new | \`${new}\` |
+
+          Checksums refreshed via \`updpkgsums\`, \`.SRCINFO\` regenerated, and the package built successfully in CI. See the run artifact for the built \`*.pkg.tar.zst\`.
+
+          <sub>Note: because this PR is opened by \`GITHUB_TOKEN\`, the \`Build\` workflow will not re-run on it automatically. The package was already built and validated in this run.</sub>" \
+            --base main \
+            --head "$branch"
+
+      - name: Upload built package
+        if: steps.guard.outputs.proceed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-desktop-official-${{ steps.detect.outputs.latest }}
+          path: ${{ github.workspace }}/*.pkg.tar.zst
+          if-no-files-found: error
+
+      - name: Open tracking issue on failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          title="Nightly update failed on $(date -u +%Y-%m-%d)"
+          # Dedupe: don't stack duplicate issues for the same day.
+          if gh issue list --state open --search "$title in:title" | grep -q .; then
+            echo "Issue already open; not creating a duplicate."
+            exit 0
+          fi
+          gh issue create \
+            --title "$title" \
+            --body "The nightly update workflow failed. See the run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            --label "automation" || \
+          gh issue create \
+            --title "$title" \
+            --body "The nightly update workflow failed. See the run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

@@ -1,0 +1,43 @@
+name: Release
+
+# When a version tag (v*) is pushed, build the package and attach the
+# *.pkg.tar.zst to a GitHub Release. While the AUR is closed, this lets users
+# install directly:  sudo pacman -U <release-asset-url>
+#
+# Typical flow: merge a nightly update PR, then tag the merge commit, e.g.
+#   git tag v1.18286.2 && git push origin v1.18286.2
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built package
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: dist
+
+      - name: Create release and upload package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            dist/*.pkg.tar.zst
