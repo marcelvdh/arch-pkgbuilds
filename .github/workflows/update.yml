@@ -7,11 +7,18 @@ name: Nightly update
 # If anything fails, a tracking issue is opened so the breakage is not silent.
 
 on:
+  push:
+    branches: [ci/nightly-autoupdate]   # TEMP: branch testing; remove before merging
   schedule:
     # 23:00 UTC daily. GitHub cron is UTC and does NOT follow DST, so this is
     # 23:00 in London during winter (GMT) and 00:00 during summer (BST).
     - cron: '0 23 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Detect and build, but do not commit/push or open a PR
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -57,22 +64,32 @@ jobs:
             echo "Already up to date."
           fi
 
-      - name: Skip if branch/PR already exists
+      - name: Decide what to do
         id: guard
         if: steps.detect.outputs.update_available == 'true'
+        # DRY: true for branch-test pushes and for dispatch with dry_run=true.
+        # In dry mode we build to validate but never commit/push or open a PR.
+        env:
+          DRY: ${{ github.event_name == 'push' || github.event.inputs.dry_run == 'true' }}
         run: |
           set -euo pipefail
           branch="autoupdate/${{ steps.detect.outputs.latest }}"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
-          if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+          if [[ "$DRY" == "true" ]]; then
+            echo "Dry run: will build but not open a PR."
+            echo "do_build=true" >> "$GITHUB_OUTPUT"
+            echo "do_pr=false"   >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
             echo "Branch $branch already exists; skipping."
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "do_build=false" >> "$GITHUB_OUTPUT"
+            echo "do_pr=false"    >> "$GITHUB_OUTPUT"
           else
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            echo "do_build=true" >> "$GITHUB_OUTPUT"
+            echo "do_pr=true"    >> "$GITHUB_OUTPUT"
           fi
 
       - name: Bump, refresh checksums, regenerate .SRCINFO, build
-        if: steps.guard.outputs.proceed == 'true'
+        if: steps.guard.outputs.do_build == 'true'
         run: |
           sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && set -euo pipefail && \
             sed -i -E 's/^pkgver=.*/pkgver=${{ steps.detect.outputs.latest }}/' PKGBUILD && \
@@ -81,7 +98,7 @@ jobs:
             bash scripts/build.sh"
 
       - name: Open pull request
-        if: steps.guard.outputs.proceed == 'true'
+        if: steps.guard.outputs.do_pr == 'true'
         run: |
           set -euo pipefail
           branch="${{ steps.guard.outputs.branch }}"
@@ -110,7 +127,7 @@ jobs:
             --head "$branch"
 
       - name: Upload built package
-        if: steps.guard.outputs.proceed == 'true'
+        if: steps.guard.outputs.do_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: claude-desktop-official-${{ steps.detect.outputs.latest }}
