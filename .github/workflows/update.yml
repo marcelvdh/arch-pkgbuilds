@@ -1,8 +1,6 @@
 name: Nightly update
 
 on:
-  push:
-    branches: [ci/nightly-autoupdate]   # TEMP: for branch testing, remove before merging
   schedule:
     - cron: '0 23 * * *'                # 23:00 UTC (23:00 GMT / 00:00 BST in London)
   workflow_dispatch:
@@ -52,7 +50,7 @@ jobs:
         env:
           current: ${{ steps.detect.outputs.current }}
           latest: ${{ steps.detect.outputs.latest }}
-          dry: ${{ github.event_name == 'push' || github.event.inputs.dry_run == 'true' }}
+          dry: ${{ github.event.inputs.dry_run == 'true' }}
         run: |
           branch="autoupdate/$latest"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
