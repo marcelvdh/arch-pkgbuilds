@@ -10,7 +10,7 @@ on:
       dry_run:
         description: Build but do not open a PR
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: write
