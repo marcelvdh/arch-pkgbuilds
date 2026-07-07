@@ -1,0 +1,105 @@
+name: Nightly update
+
+on:
+  schedule:
+    - cron: '0 23 * * *'                # 23:00 UTC (23:00 GMT / 00:00 BST in London)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build but do not open a PR
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: nightly-update
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Install toolchain
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare build user
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Detect versions
+        id: detect
+        run: |
+          current="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+          latest="$(bash scripts/latest-version.sh)"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "Current: $current   Latest: $latest"
+
+      - name: Decide what to do
+        id: guard
+        env:
+          current: ${{ steps.detect.outputs.current }}
+          latest: ${{ steps.detect.outputs.latest }}
+          dry: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          branch="autoupdate/$latest"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          newest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
+          if [[ "$current" == "$latest" || "$newest" != "$latest" ]]; then
+            echo "Already up to date."
+          elif [[ "$dry" == "true" ]]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo "Branch $branch already exists; skipping."
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "pr=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump and build
+        if: steps.guard.outputs.build == 'true'
+        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/bump.sh '${{ steps.detect.outputs.latest }}'"
+
+      - name: Open pull request
+        if: steps.guard.outputs.pr == 'true'
+        env:
+          branch: ${{ steps.guard.outputs.branch }}
+          old: ${{ steps.detect.outputs.current }}
+          new: ${{ steps.detect.outputs.latest }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add PKGBUILD .SRCINFO
+          git commit -m "Update to $new"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Update to $new" \
+            --body "Automated update from $old to $new."
+
+      - name: Upload built package
+        if: steps.guard.outputs.build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-desktop-official-${{ steps.detect.outputs.latest }}
+          path: ${{ github.workspace }}/*.pkg.tar.zst
+          if-no-files-found: error
+
+      - name: Report failure
+        if: failure()
+        run: |
+          title="Nightly update failed on $(date -u +%Y-%m-%d)"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          gh issue list --state open --search "$title in:title" | grep -q . \
+            || gh issue create --title "$title" --body "The nightly update failed: $run_url"
