@@ -72,8 +72,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           if [[ "$dry" == "true" ]]; then
             echo "Dry run: building only, no PR."
-          elif [[ "$branch" == autoupdate/* ]] && git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
-            echo "Branch $branch already exists; skipping PR."
+          elif [[ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]]; then
+            echo "An open PR for $branch already exists; skipping."
           else
             echo "pr=true" >> "$GITHUB_OUTPUT"
           fi
@@ -94,7 +94,7 @@ jobs:
           git add PKGBUILD .SRCINFO
           git commit -m "$title"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push -u origin "$branch"
+          git push -fu origin "$branch"
           gh pr create --base main --head "$branch" --title "$title" --body "$title"
 
       - name: Upload built package
