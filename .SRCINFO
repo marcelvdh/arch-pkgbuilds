@@ -1,6 +1,6 @@
 pkgbase = claude-desktop-official
 	pkgdesc = Claude Desktop Client (Stable Release Channel)
-	pkgver = 1.30096.1
+	pkgver = 1.32352.1
 	pkgrel = 1
 	url = https://claude.com/download
 	arch = x86_64
@@ -35,7 +35,7 @@ pkgbase = claude-desktop-official
 	optdepends = virtiofsd: Provides host-to-guest shared folder mounting paths under QEMU isolation
 	options = !emptydirs
 	options = !strip
-	source = https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_1.30096.1_amd64.deb
-	sha512sums = a4e86e99618fc1fb779f0ea9deabbbea639df73b7d17b539ae8cb03a51a6f4f78c107e554c4a679292f8dc3ed63b047b7c7064919b0f8827e4a3931c8562bc20
+	source = https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_1.32352.1_amd64.deb
+	sha512sums = 8785463def23975dc8426a5aa4201bc3408658a4eef91884eff974cd23da1d36ad3f71a1a6f94b8cacde51ef4b4b3f49c02aff55bbd434d4c409c22b7d5cb2f5
 
 pkgname = claude-desktop-official
