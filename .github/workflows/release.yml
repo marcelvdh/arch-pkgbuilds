@@ -71,6 +71,7 @@ jobs:
 
       - name: Publish release
         run: |
+          ver="$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
           gh release create "${{ steps.r.outputs.tag }}" --target "$GITHUB_SHA" \
-            --title "${{ steps.r.outputs.tag }}" --generate-notes \
+            --title "${{ steps.r.outputs.tag }}" --notes "$pkg $ver" \
             packages/$pkg/*.pkg.tar.zst
