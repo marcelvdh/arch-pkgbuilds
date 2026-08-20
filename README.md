@@ -38,8 +38,8 @@ git tag google-chrome/v151.0.7922.169
 git push origin google-chrome/v151.0.7922.169
 ```
 
-or run `release.yml` from the Actions tab and pick the package (it tags the
-current `pkgver`).
+or run `release.yml` from the Actions tab: enter a package name, or leave it
+blank to release every package at its current `pkgver`.
 
 ## Add a package
 
