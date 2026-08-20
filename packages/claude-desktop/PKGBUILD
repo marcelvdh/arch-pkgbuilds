@@ -1,6 +1,6 @@
 # Maintainer: marcelvdh <marcelvdh@linux.com>
 
-pkgname=claude-desktop-official
+pkgname=claude-desktop
 pkgver=1.32885.1
 pkgrel=1
 pkgdesc="Claude Desktop Client (Stable Release Channel)"
