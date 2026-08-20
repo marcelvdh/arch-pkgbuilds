@@ -7,19 +7,42 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: Package to release (folder name under packages/)
+        description: Package to release (leave blank to release all)
         type: string
-        required: true
+        required: false
 
 permissions:
   contents: write
 
 jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.l.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            list="[\"${GITHUB_REF_NAME%%/*}\"]"
+          elif [ -n "${{ github.event.inputs.package }}" ]; then
+            list="[\"${{ github.event.inputs.package }}\"]"
+          else
+            list="$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')"
+          fi
+          echo "packages=$list" >> "$GITHUB_OUTPUT"
+
   release:
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.packages) }}
     runs-on: ubuntu-latest
     container: archlinux:latest
     env:
       GH_TOKEN: ${{ github.token }}
+      pkg: ${{ matrix.package }}
     steps:
       - name: Install toolchain
         run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli w3m
@@ -32,25 +55,22 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Resolve package and tag
+      - name: Resolve tag
         id: r
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            pkg="${{ github.event.inputs.package }}"
-            tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
-          else
-            tag="$GITHUB_REF_NAME"
-            pkg="${tag%%/*}"
-          fi
           test -f "packages/$pkg/PKGBUILD" || { echo "Unknown package: $pkg" >&2; exit 1; }
-          echo "pkg=$pkg" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Build
-        run: sudo -H -u builder bash -c "cd 'packages/${{ steps.r.outputs.pkg }}' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
 
       - name: Publish release
         run: |
           gh release create "${{ steps.r.outputs.tag }}" --target "$GITHUB_SHA" \
             --title "${{ steps.r.outputs.tag }}" --generate-notes \
-            packages/${{ steps.r.outputs.pkg }}/*.pkg.tar.zst
+            packages/$pkg/*.pkg.tar.zst
