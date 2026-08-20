@@ -1,51 +1,53 @@
-# claude-desktop-official
+# arch-pkgbuilds
 
-Arch Linux `PKGBUILD` for the official Anthropic **Claude Desktop** client
-(stable channel). It repackages Anthropic's upstream `.deb` into a native Arch
-package.
+A personal collection of Arch Linux `PKGBUILD`s I build and trust, compiled in
+CI as artifacts.
 
-## Install
+## Packages
 
-### From a built release (no AUR needed)
+| Package | Source |
+|---|---|
+| `claude-desktop-official` | own — repackages Anthropic's `.deb` |
+| `google-chrome` | AUR (verbatim) |
+| `docker-desktop` | AUR (verbatim) |
 
-Each tagged release ships a prebuilt package attached to the
-[GitHub Release](../../releases). Install it directly:
-
-```sh
-sudo pacman -U <release-asset-url>
-```
-
-### Build it yourself
+## Build one locally
 
 ```sh
-git clone https://github.com/marcelvdh/claude-desktop-official
-cd claude-desktop-official
+cd packages/<name>
 makepkg -si
 ```
 
-## Automation
+## CI
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| [`update.yml`](.github/workflows/update.yml) | nightly (23:00 UTC) + manual | Checks Anthropic's APT repo for a newer version; if found, bumps the `PKGBUILD`, refreshes `sha512sums` (`updpkgsums`), regenerates `.SRCINFO`, builds to validate, and opens a PR. Opens a tracking issue on failure. |
-| [`build.yml`](.github/workflows/build.yml) | PRs / push to `main` | Builds the package in an Arch container, lints with `namcap`, verifies `.SRCINFO` is in sync, and uploads the `*.pkg.tar.zst` artifact. |
-| [`release.yml`](.github/workflows/release.yml) | push tag `v*` | Builds and attaches the package to a GitHub Release. |
+| `build.yml` | PR / push | builds every package in an Arch container and uploads each as an artifact |
+| `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
+| `release.yml` | tag `<name>/v*` / manual | builds the tagged package and attaches it to a GitHub Release |
 
-### Cutting a release
+Each `packages/<name>/` folder is a pure mirror of the upstream package (PKGBUILD
+plus its source files — nothing generated). Version-checking lives separately in
+`updaters/<name>.sh` (apt-index packages share `scripts/apt-latest.sh`), run with
+the package folder as its working directory.
 
-After merging a nightly update PR:
+## Release a package
 
 ```sh
-git checkout main && git pull
-git tag v<version>          # e.g. v1.18286.2
-git push origin v<version>
+git tag google-chrome/v151.0.7922.169
+git push origin google-chrome/v151.0.7922.169
 ```
 
-### Notes
+or run `release.yml` from the Actions tab and pick the package (it tags the
+current `pkgver`).
 
-- The nightly PR is opened by `GITHUB_TOKEN`, so `build.yml` does **not**
-  re-run on it automatically — the package is already built and validated inside
-  the update run. To force CI to re-run on bot PRs, add a fine-grained PAT secret
-  and use it for the checkout/push in `update.yml`.
-- `scripts/latest-version.sh` is dependency-free (`curl`/`awk`/`sort`) and runs
-  on any platform, so the version-detection logic can be tested locally.
+## Add a package
+
+```sh
+scripts/add-aur.sh <name>     # vendors packages/<name>/ from the AUR
+```
+
+Review the PKGBUILD — you own the copy now. It builds and releases immediately;
+the workflows auto-discover `packages/*/`, so there are no lists to edit. For
+nightly version-bump PRs, add an `updaters/<name>.sh` that bumps its PKGBUILD to
+the latest upstream version (optional; runs with the package folder as cwd).

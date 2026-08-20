@@ -3,38 +3,54 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - '*/v*'                     # e.g. google-chrome/v151.0.7922.169
   workflow_dispatch:
+    inputs:
+      package:
+        description: Package to release (folder name under packages/)
+        type: string
+        required: true
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
   release:
-    needs: build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    container: archlinux:latest
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Install toolchain
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli w3m
+
       - uses: actions/checkout@v4
 
-      - name: Download built package
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.artifact-name }}
-          path: dist
-
-      - name: Create release and upload package
+      - name: Prepare build user
         run: |
-          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
-            tag="$GITHUB_REF_NAME"
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Resolve package and tag
+        id: r
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            pkg="${{ github.event.inputs.package }}"
+            tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
           else
-            tag="v$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+            tag="$GITHUB_REF_NAME"
+            pkg="${tag%%/*}"
           fi
-          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
-            --generate-notes dist/*.pkg.tar.zst
+          test -f "packages/$pkg/PKGBUILD" || { echo "Unknown package: $pkg" >&2; exit 1; }
+          echo "pkg=$pkg" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: sudo -H -u builder bash -c "cd 'packages/${{ steps.r.outputs.pkg }}' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+
+      - name: Publish release
+        run: |
+          gh release create "${{ steps.r.outputs.tag }}" --target "$GITHUB_SHA" \
+            --title "${{ steps.r.outputs.tag }}" --generate-notes \
+            packages/${{ steps.r.outputs.pkg }}/*.pkg.tar.zst

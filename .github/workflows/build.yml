@@ -4,11 +4,6 @@ on:
   pull_request:
   push:
     branches: [main]
-  workflow_call:
-    outputs:
-      artifact-name:
-        description: Name of the uploaded package artifact
-        value: ${{ jobs.build.outputs.artifact-name }}
 
 permissions:
   contents: read
@@ -18,14 +13,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.l.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: echo "packages=$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: discover
     runs-on: ubuntu-latest
     container: archlinux:latest
-    outputs:
-      artifact-name: claude-desktop-official-pkg
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.packages) }}
     steps:
       - name: Install toolchain
-        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo w3m
 
       - uses: actions/checkout@v4
 
@@ -36,11 +43,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build and lint
-        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/build.sh"
+        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE/packages/${{ matrix.package }}' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: claude-desktop-official-pkg
-          path: ${{ github.workspace }}/*.pkg.tar.zst
+          name: ${{ matrix.package }}-pkg
+          path: ${{ github.workspace }}/packages/${{ matrix.package }}/*.pkg.tar.zst
           if-no-files-found: error
