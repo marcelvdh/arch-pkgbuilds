@@ -7,7 +7,7 @@ CI as artifacts.
 
 | Package | Source |
 |---|---|
-| `claude-desktop-official` | own — repackages Anthropic's `.deb` |
+| `claude-desktop` | own — repackages Anthropic's `.deb` |
 | `google-chrome` | AUR (verbatim) |
 | `docker-desktop` | AUR (verbatim) |
 
