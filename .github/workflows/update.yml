@@ -9,28 +9,38 @@ on:
         description: Build but do not open a PR
         type: boolean
         default: true
-      force:
-        description: Proceed even if already up to date (bumps pkgrel to force a testable PR)
-        type: boolean
-        default: false
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
 
-concurrency:
-  group: nightly-update
-
 jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.l.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: l
+        run: echo "packages=$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')" >> "$GITHUB_OUTPUT"
+
   update:
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.packages) }}
     runs-on: ubuntu-latest
     container: archlinux:latest
+    concurrency:
+      group: update-${{ matrix.package }}
     env:
       GH_TOKEN: ${{ github.token }}
+      pkg: ${{ matrix.package }}
     steps:
       - name: Install toolchain
-        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli w3m
 
       - uses: actions/checkout@v4
 
@@ -40,75 +50,53 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Detect versions
-        id: detect
+      - name: Update and build
+        id: up
         run: |
-          current="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
-          latest="$(bash scripts/latest-version.sh)"
-          echo "current=$current" >> "$GITHUB_OUTPUT"
-          echo "latest=$latest" >> "$GITHUB_OUTPUT"
-          echo "Current: $current   Latest: $latest"
-
-      - name: Decide what to do
-        id: guard
-        env:
-          current: ${{ steps.detect.outputs.current }}
-          latest: ${{ steps.detect.outputs.latest }}
-          dry: ${{ github.event.inputs.dry_run == 'true' }}
-          force: ${{ github.event.inputs.force == 'true' }}
-        run: |
-          newest="$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)"
-          if [[ "$current" != "$latest" && "$newest" == "$latest" ]]; then
-            pkgver="$latest"; pkgrel=1; branch="autoupdate/$latest"; title="Update to $latest"
-          elif [[ "$force" == "true" ]]; then
-            pkgver="$current"; pkgrel="$GITHUB_RUN_NUMBER"
-            branch="force-test/$current-$GITHUB_RUN_NUMBER"; title="Force test build $current-$GITHUB_RUN_NUMBER"
-          else
-            echo "Already up to date."; exit 0
+          if [ ! -f "updaters/$pkg.sh" ]; then
+            echo "No updater; nothing to check."
+            exit 0
           fi
-          {
-            echo "pkgver=$pkgver"; echo "pkgrel=$pkgrel"
-            echo "branch=$branch"; echo "title=$title"; echo "build=true"
-          } >> "$GITHUB_OUTPUT"
-          if [[ "$dry" == "true" ]]; then
-            echo "Dry run: building only, no PR."
-          elif [[ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]]; then
-            echo "An open PR for $branch already exists; skipping."
-          else
-            echo "pr=true" >> "$GITHUB_OUTPUT"
+          old="$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
+          new="$(sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/updaters/$pkg.sh'")"
+          echo "$pkg: $old -> $new"
+          if git diff --quiet -- "packages/$pkg/PKGBUILD"; then
+            echo "Already up to date."
+            exit 0
           fi
-
-      - name: Bump and build
-        if: steps.guard.outputs.build == 'true'
-        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE' && bash scripts/bump.sh '${{ steps.guard.outputs.pkgver }}' '${{ steps.guard.outputs.pkgrel }}'"
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
 
       - name: Open pull request
-        if: steps.guard.outputs.pr == 'true'
-        env:
-          branch: ${{ steps.guard.outputs.branch }}
-          title: ${{ steps.guard.outputs.title }}
+        if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
         run: |
+          new="${{ steps.up.outputs.new }}"
+          branch="autoupdate/$pkg-$new"
+          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+            echo "An open PR for $branch already exists; skipping."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add PKGBUILD .SRCINFO
-          git commit -m "$title"
+          git add "packages/$pkg/PKGBUILD"
+          git commit -m "Update $pkg to $new"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push -fu origin "$branch"
-          gh pr create --base main --head "$branch" --title "$title" --body "$title"
+          gh pr create --base main --head "$branch" --title "Update $pkg to $new" --body "Update $pkg to $new."
 
       - name: Upload built package
-        if: steps.guard.outputs.build == 'true'
+        if: steps.up.outputs.new != ''
         uses: actions/upload-artifact@v4
         with:
-          name: claude-desktop-official-${{ steps.guard.outputs.pkgver }}-${{ steps.guard.outputs.pkgrel }}
-          path: ${{ github.workspace }}/*.pkg.tar.zst
+          name: ${{ matrix.package }}-${{ steps.up.outputs.new }}
+          path: ${{ github.workspace }}/packages/${{ matrix.package }}/*.pkg.tar.zst
           if-no-files-found: error
 
       - name: Report failure
         if: failure()
         run: |
-          title="Nightly update failed on $(date -u +%Y-%m-%d)"
+          title="Update failed: $pkg on $(date -u +%Y-%m-%d)"
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           gh issue list --state open --search "$title in:title" | grep -q . \
-            || gh issue create --title "$title" --body "The nightly update failed: $run_url"
+            || gh issue create --title "$title" --body "$run_url"

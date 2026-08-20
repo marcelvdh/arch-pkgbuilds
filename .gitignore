@@ -1,6 +1,17 @@
 # makepkg build output
-/src/
-/pkg/
-*.pkg.tar.zst
+pkg/
+src/
+*.pkg.tar*
+*.src.tar*
+*.tar.zst
 *.deb
 *.log
+
+# generated from PKGBUILD; only needed to publish to the AUR
+.SRCINFO
+
+# macOS
+.DS_Store
+
+# JetBrains
+.idea/
