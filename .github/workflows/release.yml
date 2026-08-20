@@ -71,7 +71,13 @@ jobs:
 
       - name: Publish release
         run: |
+          tag="${{ steps.r.outputs.tag }}"
           ver="$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
-          gh release create "${{ steps.r.outputs.tag }}" --target "$GITHUB_SHA" \
-            --title "${{ steps.r.outputs.tag }}" --notes "$pkg $ver" \
-            packages/$pkg/*.pkg.tar.zst
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
+            gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" \
+              --title "$tag" --notes "$pkg $ver" \
+              packages/$pkg/*.pkg.tar.zst
+          fi
