@@ -43,7 +43,9 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build and lint
-        run: sudo -H -u builder bash -c "cd '$GITHUB_WORKSPACE/packages/${{ matrix.package }}' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+        env:
+          pkg: ${{ matrix.package }}
+        run: sudo -H -u builder bash -c 'cd "$1" && bash "$2"' bash "$GITHUB_WORKSPACE/packages/$pkg" "$GITHUB_WORKSPACE/scripts/build.sh"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
