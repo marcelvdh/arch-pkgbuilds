@@ -1,8 +1,4 @@
-# Maintainer: marcelvdh <marcelvdh@linux.com>
-# Contributor: Luis Gustavo S. Barreto <gustavosbarreto@gmail.com>
-# Contributor: Leandro Cunha <leandrocunhaemail@gmail.com>
-# Contributor: Mark Allen Park <markallenpark@gmail.com>
-# Contributor: Luciano Ciccariello <luciano.ciccariello@docker.com>
+# Forked from the AUR docker-desktop package: https://aur.archlinux.org/packages/docker-desktop
 
 pkgname=docker-desktop
 pkgver=4.87.0
