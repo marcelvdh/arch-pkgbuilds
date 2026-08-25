@@ -1,4 +1,4 @@
-Opt#!/bin/bash
+#!/bin/bash
 
 post_install_upgrade() {
     echo 'Enabling use of privileged ports by Docker Desktop'
