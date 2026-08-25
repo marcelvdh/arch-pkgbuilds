@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - '*/v*'                     # e.g. google-chrome/v151.0.7922.169
+    branches:
+      - main
+    paths:
+      - 'packages/*/PKGBUILD'      # e.g. a merged autoupdate PR
   workflow_dispatch:
     inputs:
       package:
@@ -21,10 +25,14 @@ jobs:
       packages: ${{ steps.l.outputs.packages }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: l
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ]; then
             list="[\"${GITHUB_REF_NAME%%/*}\"]"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            list="$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' -- 'packages/*/PKGBUILD' | cut -d/ -f2 | sort -u | jq -Rsc 'split("\n")|map(select(length>0))')"
           elif [ -n "${{ github.event.inputs.package }}" ]; then
             list="[\"${{ github.event.inputs.package }}\"]"
           else
@@ -59,7 +67,7 @@ jobs:
         id: r
         run: |
           test -f "packages/$pkg/PKGBUILD" || { echo "Unknown package: $pkg" >&2; exit 1; }
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ]; then
             tag="$GITHUB_REF_NAME"
           else
             tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"

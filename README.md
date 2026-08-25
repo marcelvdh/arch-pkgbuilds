@@ -8,8 +8,9 @@ CI as artifacts.
 | Package | Source |
 |---|---|
 | `claude-desktop` | own — repackages Anthropic's `.deb` |
-| `google-chrome` | AUR (verbatim) |
-| `docker-desktop` | AUR (verbatim) |
+| `google-chrome` | forked from AUR |
+| `docker-desktop` | forked from AUR |
+| `winbox` | forked from AUR |
 
 ## Build one locally
 
@@ -24,10 +25,10 @@ makepkg -si
 |---|---|---|
 | `build.yml` | PR / push | builds every package in an Arch container and uploads each as an artifact |
 | `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
-| `release.yml` | tag `<name>/v*` / manual | builds the tagged package and attaches it to a GitHub Release |
+| `release.yml` | merge to `main` touching a PKGBUILD / tag `<name>/v*` / manual | builds the package and attaches it to a GitHub Release |
 
-Each `packages/<name>/` folder is a pure mirror of the upstream package (PKGBUILD
-plus its source files — nothing generated). Version-checking lives separately in
+Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
+files — nothing generated). Version-checking lives separately in
 `updaters/<name>.sh` (apt-index packages share `scripts/apt-latest.sh`), run with
 the package folder as its working directory.
 
