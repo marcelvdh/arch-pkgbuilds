@@ -1,8 +1,4 @@
-# Maintainer: marcelvdh <marcelvdh@linux.com>
-# Contributor: Christian Heusel <christian@heusel.eu>
-# Contributor: Knut Ahlers <knut at ahlers dot me>
-# Contributor: Det <nimetonmaili g-mail>
-# Contributor: t3ddy, Lex Rivera aka x-demon, ruario, Abdullah
+# Forked from the AUR google-chrome package: https://aur.archlinux.org/packages/google-chrome
 
 # Check for new Linux releases in: http://googlechromereleases.blogspot.com/search/label/Stable%20updates
 # or use: $ curl -sSf https://dl.google.com/linux/chrome/deb/dists/stable/main/binary-amd64/Packages | grep -A1 "Package: google-chrome-stable" | awk '/Version/{print $2}' | cut -d '-' -f1
