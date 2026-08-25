@@ -76,13 +76,21 @@ jobs:
             echo "An open PR for $branch already exists; skipping."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$branch"
-          git add "packages/$pkg/PKGBUILD"
-          git commit -m "Update $pkg to $new"
-          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push -fu origin "$branch"
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/heads/$branch" -f sha="$GITHUB_SHA" \
+            || gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" -f sha="$GITHUB_SHA" -F force=true
+          # Commit through the API instead of git push so GitHub signs it
+          query='mutation($repo:String!,$branch:String!,$headline:String!,$oid:GitObjectID!,$path:String!,$contents:Base64String!){
+            createCommitOnBranch(input:{
+              branch:{repositoryNameWithOwner:$repo,branchName:$branch},
+              message:{headline:$headline},
+              expectedHeadOid:$oid,
+              fileChanges:{additions:[{path:$path,contents:$contents}]}
+            }){commit{oid}}}'
+          gh api graphql -f query="$query" \
+            -f repo="$GITHUB_REPOSITORY" -f branch="$branch" \
+            -f headline="Update $pkg to $new" -f oid="$GITHUB_SHA" \
+            -f path="packages/$pkg/PKGBUILD" \
+            -f contents="$(base64 -w0 "packages/$pkg/PKGBUILD")"
           gh pr create --base main --head "$branch" --title "Update $pkg to $new" --body "Update $pkg to $new."
 
       - name: Upload built package
