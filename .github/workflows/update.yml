@@ -69,8 +69,9 @@ jobs:
 
       - name: Open pull request
         if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
+        env:
+          new: ${{ steps.up.outputs.new }}
         run: |
-          new="${{ steps.up.outputs.new }}"
           branch="autoupdate/$pkg-$new"
           if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
             echo "An open PR for $branch already exists; skipping."
