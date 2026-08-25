@@ -8,6 +8,7 @@ read -r ver rev < <(curl -fsSL https://desktop.docker.com/linux/main/amd64/appca
   | sed -E 's/Version ([0-9.]+) \(([0-9]+)\)/\1 \2/' \
   | sort -V | tail -1)
 
+[[ "$ver" =~ ^[0-9][0-9A-Za-z._-]*$ && "$rev" =~ ^[0-9]+$ ]] || { echo "suspicious version: $ver ($rev)" >&2; exit 1; }
 sed -i -E "s/^pkgver=.*/pkgver=$ver/" PKGBUILD
 sed -i -E "s/^_revision=.*/_revision=$rev/" PKGBUILD
 echo "$ver"
