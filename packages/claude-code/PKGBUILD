@@ -31,7 +31,7 @@ source=('cc-legal.md')
 source_x86_64=("claude-${pkgver}-x86_64::https://downloads.claude.ai/claude-code-releases/${pkgver}/linux-x64/claude")
 source_aarch64=("claude-${pkgver}-aarch64::https://downloads.claude.ai/claude-code-releases/${pkgver}/linux-arm64/claude")
 
-sha256sums=('PLACEHOLDER_FILL_ME')
+sha256sums=('4a4cc1762fb1d992a66347dcf94c60a27d328391d8074c13e8ae9d5c4182413')
 sha256sums_x86_64=('1a0a662dc1bb938eaec38545abce9a4a69113d7d7f7c5e1a553ea276617b906a')
 sha256sums_aarch64=('f98296e6e61c507589d1a973b262976b734700ec4e055cb64afdbf6d9a337db7')
 
