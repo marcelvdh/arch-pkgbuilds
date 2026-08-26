@@ -7,9 +7,11 @@ CI as artifacts.
 
 | Package | Source |
 |---|---|
+| `claude-code` | forked from AUR |
 | `claude-desktop` | own — repackages Anthropic's `.deb` |
 | `google-chrome` | forked from AUR |
 | `docker-desktop` | forked from AUR |
+| `docker-sbx` | forked from AUR |
 | `winbox` | forked from AUR |
 
 ## Build one locally
