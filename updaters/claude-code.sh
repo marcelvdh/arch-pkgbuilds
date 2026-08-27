@@ -5,7 +5,4 @@
 set -euo pipefail
 
 ver="$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest | tr -d '[:space:]')"
-
-[[ "$ver" =~ ^[0-9][0-9A-Za-z._-]*$ ]] || { echo "suspicious version: $ver" >&2; exit 1; }
-sed -i -E "s/^pkgver=.*/pkgver=$ver/" PKGBUILD
-echo "$ver"
+exec bash "$(dirname "$0")/../scripts/set-pkgver.sh" "$ver"
