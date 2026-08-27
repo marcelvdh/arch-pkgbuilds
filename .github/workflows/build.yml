@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: l
-        run: echo "packages=$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')" >> "$GITHUB_OUTPUT"
+        run: echo "packages=$(bash scripts/list-packages.sh)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: discover
@@ -33,21 +33,17 @@ jobs:
       matrix:
         package: ${{ fromJSON(needs.discover.outputs.packages) }}
     steps:
-      - name: Install toolchain
-        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo w3m
+      - name: Install git                # checkout and the setup action need it
+        run: pacman -Syu --noconfirm --needed git
 
       - uses: actions/checkout@v4
 
-      - name: Prepare build user
-        run: |
-          useradd -m builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: ./.github/actions/setup-arch
 
       - name: Build and lint
         env:
           pkg: ${{ matrix.package }}
-        run: sudo -H -u builder bash -c 'cd "$1" && bash "$2"' bash "$GITHUB_WORKSPACE/packages/$pkg" "$GITHUB_WORKSPACE/scripts/build.sh"
+        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4

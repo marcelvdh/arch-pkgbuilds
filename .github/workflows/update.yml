@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: l
-        run: echo "packages=$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')" >> "$GITHUB_OUTPUT"
+        run: echo "packages=$(bash scripts/list-packages.sh)" >> "$GITHUB_OUTPUT"
 
   update:
     needs: discover
@@ -39,16 +39,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       pkg: ${{ matrix.package }}
     steps:
-      - name: Install toolchain
-        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli w3m
+      - name: Install git                # checkout and the setup action need it
+        run: pacman -Syu --noconfirm --needed git
 
       - uses: actions/checkout@v4
 
-      - name: Prepare build user
-        run: |
-          useradd -m builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: ./.github/actions/setup-arch
 
       - name: Update and build
         id: up
@@ -73,7 +69,7 @@ jobs:
           new: ${{ steps.up.outputs.new }}
         run: |
           branch="autoupdate/$pkg-$new"
-          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+          if gh pr list --head "$branch" --state open | grep -q .; then
             echo "An open PR for $branch already exists; skipping."
             exit 0
           fi

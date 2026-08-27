@@ -38,7 +38,7 @@ jobs:
           elif [ -n "$pkg_input" ]; then
             list="$(jq -nc --arg p "$pkg_input" '[$p]')"
           else
-            list="$(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | jq -Rsc 'split("\n")|map(select(length>0))')"
+            list="$(bash scripts/list-packages.sh)"
           fi
           echo "packages=$list" >> "$GITHUB_OUTPUT"
 
@@ -54,16 +54,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       pkg: ${{ matrix.package }}
     steps:
-      - name: Install toolchain
-        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib namcap git sudo github-cli w3m
+      - name: Install git                # checkout and the setup action need it
+        run: pacman -Syu --noconfirm --needed git
 
       - uses: actions/checkout@v4
 
-      - name: Prepare build user
-        run: |
-          useradd -m builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: ./.github/actions/setup-arch
 
       - name: Resolve tag
         id: r
@@ -75,6 +71,7 @@ jobs:
             tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "ver=${tag##*/v}" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
@@ -82,8 +79,8 @@ jobs:
       - name: Publish release
         env:
           tag: ${{ steps.r.outputs.tag }}
+          ver: ${{ steps.r.outputs.ver }}
         run: |
-          ver="$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
             gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
