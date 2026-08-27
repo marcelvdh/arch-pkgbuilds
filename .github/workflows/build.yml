@@ -21,11 +21,27 @@ jobs:
       packages: ${{ steps.l.outputs.packages }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: l
-        run: echo "packages=$(bash scripts/list-packages.sh)" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changed="$(git diff --name-only "origin/$GITHUB_BASE_REF"...HEAD)"
+            if grep -qv '^packages/' <<<"$changed"; then
+              list="$(bash scripts/list-packages.sh)"   # shared infra changed: build all
+            else
+              list="$(cut -d/ -f2 <<<"$changed" | sort -u \
+                | while read -r p; do test -d "packages/$p" && echo "$p"; done \
+                | jq -Rsc 'split("\n")|map(select(length>0))')"
+            fi
+          else
+            list="$(bash scripts/list-packages.sh)"
+          fi
+          echo "packages=$list" >> "$GITHUB_OUTPUT"
 
   build:
     needs: discover
+    if: needs.discover.outputs.packages != '[]'
     runs-on: ubuntu-latest
     container: archlinux:latest
     strategy:
