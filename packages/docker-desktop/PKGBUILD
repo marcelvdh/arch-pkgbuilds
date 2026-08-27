@@ -3,7 +3,7 @@
 pkgname=docker-desktop
 pkgver=4.88.1
 _revision=237512
-pkgrel=2
+pkgrel=3
 pkgdesc="Docker Desktop is an easy-to-install application that enables you to locally build and share containerized applications and microservices."
 arch=('x86_64')
 url="https://www.docker.com/products/docker-desktop/"
@@ -11,11 +11,14 @@ license=('custom: Docker Agreement')
 depends=('docker>=28.3.0' 'curl>=8.5.0' 'qemu>=8.0.4' 'libseccomp>=2.5.5' 'libcap-ng>=0.8.4' 'pass' 'desktop-file-utils' 'gtk3' 'libx11' 'shadow>=4.14.2')
 conflicts=('docker-compose' 'docker-buildx' 'docker-debug' 'docker-mcp' 'docker-scout')
 provides=('docker-compose' 'docker-buildx' 'docker-debug' 'docker-mcp' 'docker-scout')
-makedepends=('w3m')
 options=('!strip' '!debug')
 install='docker-desktop.install'
-source=("$pkgname-$pkgver-x86_64.tar.zst::https://desktop.docker.com/linux/main/amd64/$_revision/$pkgname-x86_64.pkg.tar.zst")
-sha256sums=('b1233cb7f0817db7788879e86d1834dd0b9bafcd00b21772223d0e039476d3bf')
+# Agreement text is vendored so builds don't depend on docker.com. Refresh with:
+#   w3m -dump https://www.docker.com/legal/docker-subscription-service-agreement/ > docker-agreement.txt && updpkgsums
+source=('docker-agreement.txt'
+        "$pkgname-$pkgver-x86_64.tar.zst::https://desktop.docker.com/linux/main/amd64/$_revision/$pkgname-x86_64.pkg.tar.zst")
+sha256sums=('888694f4412e253e2dbf2ca4612a43e7d833407282296c14d980735151b639de'
+            'b1233cb7f0817db7788879e86d1834dd0b9bafcd00b21772223d0e039476d3bf')
 
 package() {
     install -d "${pkgdir}/usr/bin"
@@ -42,7 +45,5 @@ package() {
     cp "${srcdir}/usr/share/applications/"* "${pkgdir}/usr/share/applications/"
 
     # License (thanks @FabioLolix)
-    install -dm755 "$pkgdir/usr/share/licenses/$pkgname"
-    w3m -dump https://www.docker.com/legal/docker-subscription-service-agreement/ \
-        > "$pkgdir/usr/share/licenses/$pkgname/docker-agreement.txt"
+    install -Dm644 "${srcdir}/docker-agreement.txt" -t "${pkgdir}/usr/share/licenses/${pkgname}"
 }

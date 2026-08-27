@@ -1,0 +1,317 @@
+Docker Subscription Service Agreement | Docker
+
+
+Docker Subscription Service Agreement
+
+Last updated on August 26, 2026
+
+This Docker Subscription Service Agreement (“Agreement”), by and between the customer identified on the applicable Order Form (“Customer”) and Docker, Inc. (“Docker”), shall govern Customer’s initial purchase on the Effective Date (set forth on Customer’s initial Order Form) as well as any future purchases made by Customer which reference this Agreement. If you are accepting this Agreement on behalf of Customer, you represent and warrant that you have the authority to bind Customer to the terms and conditions of this Agreement.
+
+The parties hereby agree as follows:
+
+Definitions. Capitalized terms shall have the meanings defined herein.
+
+“Account Administrator” or “Account Owner” means an individual named User of the Services who has been authorized by the Customer to manage the Service.
+
+“Add-on Services” means those additional software or services that may be offered in the future as additional software or services at such prices as may be noted by Docker at that time.
+
+“Agentic Platform Services” means the set of platform services and features made available by Docker as locally installable software and/or hosted services accessible via the Docker website.
+
+“AI Agent” shall mean autonomous or semi-autonomous software code performing operations on behalf of the User.
+
+“AI Features” shall mean features of the Services enabled by artificial intelligence that are designed to assist Users with analytics, automation, prediction, decision-making or other tasks. AI Features include any AI assistant (including the paid version of Gordon), AI Agent, or other automation that can propose or execute actions (including in a Sandbox environment) based on Input. “Input” means textual or other content provided by or on behalf of Customer or a User to an AI Feature. “Output” means content or actions generated or performed by an AI Feature in response to Input. Both Input and Output shall be Customer Data.
+
+“Customer Data” means all information, data, and other content, in any form or medium, that is submitted, posted, or otherwise transmitted by or on behalf of Customer in the course of using the Service, including Input and Output. For avoidance of doubt, Customer Data does not include data and information related to Customer’s use of the Services including performance information, or any other information reflecting the access and use of the Services by or on behalf of Customer or its Users (“Usage Data”).
+
+“Docker Data” means any information, data, and other content owned or controlled by Docker and made available through or in connection with the Services, except, for clarity, Output and third-party images.
+
+“Documentation” means the Services documentation made available by Docker on the Docker website at https://docs.docker.com.
+
+“Entitlements” means the User license quantities, usage minutes, use credits, image pull count and storage limits, and any additional usage limits or support features, included in the Services purchased by Customer as described in the Order Form. Customer may purchase additional Entitlements as and when made available by Docker.
+
+“Fees” means the corresponding monetary amounts quoted for a Service.
+
+“Government Entity” means (1) any federal, national, supranational, state, provincial, Commonwealth, local or foreign or similar government, governmental subdivision, regulatory or administrative body or other governmental or quasi-governmental agency, tribunal, commission, court, judicial or arbitral body, or other entity with competent jurisdiction; (2) any entity directly or indirectly owned or controlled by the government or a government organization; (3) any entity created by law or decree; (4) any entity whose principal source of funds comes from the government; or (5) any department, agency, or instrumentality of a public international organization. It is within Docker’s sole discretion to determine if an entity is considered a Government Entity under the terms of this definition.
+
+“Marketplace” means a third-party online marketplace such as Amazon Web Services, or other authorized platforms through which Customer completes a purchase for Services.
+
+“On-Demand Usage” means usage in excess of the Entitlements’ consumption limits included or additionally purchased.
+
+“Open Source Software” means third-party software that is distributed or otherwise made available as “free software”, “open source software” or under a similar licensing or distribution model.
+
+“Order Form” means the digital or physical ordering document identifying the products and related Fees as applicable for Customer’s authorized purchases from Docker. Order Forms shall be deemed incorporated herein by reference.
+
+“Reseller” means a Docker authorized third-party reseller partner.
+
+“Sandbox” means a Docker provided runtime to run workloads in a network and filesystem constrained environment.
+
+“Services” means the generally available cloud subscription software products, services (including Agentic Platform Services and Docker AI Features) and downloadable components thereof, ordered by Customer as set forth in an applicable Order Form, descriptions of which are available at, https://www.docker.com/static/Docker_Product_Schedule.pdf, as well as any updates thereto as provided by Docker. Except for certain third-party software expressly set forth in an applicable Order Form, the definition of Services does not include Third-Party Products or content available in a registry or repository, which are instead subject to the corresponding third-party’s license or terms.
+
+“Third-Party Products” means optionable hosted or downloadable software or services licensed by third-parties and that Docker may make available for Customer to use or require Customer to use in conjunction with the Services. Except as otherwise specified in an Order Form, such Third-Party Products shall be subject to the corresponding third-party’s license or terms, as applicable.
+
+“Trial Services” means software or services that are distributed or otherwise made available for Customer to try at its option, which may be designated as Early Access Products, proof of concept, beta, limited release, developer preview, non-production, evaluation, or that are similarly described in the corresponding Order Form, applicable Docker online Trial Services registration process, or Documentation. For clarity, the no-Fee version of Gordon constitutes a Trial Service.
+
+“User” means an individual human authorized by Customer to log into and/or use the Services. For paid Services tiers, Users may include employees, consultants, contractors, and agents of Customer or its affiliates subject at all times to the license restrictions of this Agreement. For purposes of AI Features use “User” shall mean a human or AI Agent.
+
+License and Ownership.
+
+License Grant. Subject to the terms and conditions of the Agreement and the applicable Order Form, Docker hereby grants Customer a limited, non-exclusive, non-transferable, non-sublicensable license during the applicable Subscription Term for Customer to permit its Users to: (i) download, install, run, and use on premises or local Services described on the applicable Order Form, and (ii) access and use hosted or cloud-based Services described on the applicable Order Form, in each case of (i) and (ii), for Customer’s internal business purposes, in accordance with and subject to the applicable Documentation and Entitlements. Notwithstanding the foregoing, Customer may redistribute Docker Images to third parties but solely when bundled with or incorporated into its own software products, and not on a standalone basis, and solely in accordance with the terms of this Agreement, including the restrictions in Section 3 herein. All third party images shall be deemed Third-Party Products subject to their corresponding terms and conditions. Customer understands and agrees that Users require a Docker Hub account to access and use the Service. Docker owns the Usage Data. Nothing herein will be construed as restricting or prohibiting Docker from utilizing the Usage Data in any way, including to enforce this Agreement or, as long as the Usage Data remains aggregated and de-identified, to optimize and improve the Services.
+
+Ownership; Reservation of Rights. Subject to the limited rights expressly granted hereunder, Docker reserves and Customer acknowledges and agrees that, as between Docker and Customer, Docker solely owns all right, title, and interest in and to the Services, Docker Data, and Usage Data (including, in each case, any improvements, modifications, and enhancements thereto, regardless of authorship) (collectively, “Docker IP”). No rights are granted to Customer hereunder (whether by implication, estoppel, exhaustion or otherwise) other than as expressly set forth herein. All intellectual property rights created in any Docker IP will vest solely in Docker upon creation, and to the extent that sole ownership does not originally vest in Docker, such intellectual property rights are hereby automatically and irrevocably assigned by Customer to Docker. Customer will take all actions and execute all documents reasonably requested by Docker to give effect to the preceding sentence.
+
+Support. During the Subscription Term, Docker will provide support for the Services in accordance with the Service Level Agreement & Terms available at https://www.docker.com/support/ as applicable to the products and support purchased via an Order Form.
+
+Trial Services and Early Access Products. Docker may offer certain product features, APIs, or other components of the Services to Customer as part of an “Early Access Program” (the “Early Access Products”) or other Trial Services to Customer. Customer’s use of Trial Services is subject to any additional terms specified by Docker and is only permitted during the limited period Docker designates (or, if not designated, until terminated in accordance with this Agreement). Docker may modify or terminate Customer’s right to use Trial Services at any time and for any reason in its sole discretion. Customer understands that Early Access Products are under active development, may be inoperable or incomplete, and are likely to contain more errors and bugs than the generally available features of the Services. Docker makes no representations as to the performance of such Early Access Products nor promises that any Early Access Products will ever be made generally available. All information regarding the features or performance of any Early Access Products is deemed Docker Confidential Information. To the maximum extent permitted by applicable law, Docker disclaims all obligations and liabilities with respect to Trial Services, including but not limited to any support, warranty, and indemnity obligations. THE TRIAL SERVICES ARE PROVIDED ON AN “AS-IS” BASIS. NOTWITHSTANDING ANYTHING ELSE IN THE AGREEMENT, DOCKER’S MAXIMUM AGGREGATE LIABILITY TO CUSTOMER FOR SUCH SERVICES SHALL NOT EXCEED THE GREATER OF (A) ONE-HUNDRED DOLLARS ($100) OR (B) THE FEES PAID BY CUSTOMER FOR SUCH TRIAL SERVICES.
+
+Payment Terms. For Services purchased or otherwise facilitated through Docker’s sales team, pricing and other relevant terms will be set forth in the applicable Order Form. Unless stated specifically otherwise in the Order Form, all payments to Docker including for invoiced On-Demand Usage, are due within 30 days of the invoice from Docker to Customer. Upon renewal, Customer shall pay the Subscription Fees set forth in the applicable renewal Order Form. Docker reserves the right to change the fees or applicable charges at the end of the Initial Term or then current renewal term. Late payments will bear interest at the rate of 1.5% per month (or the highest rate permitted by law, if less). In addition to any of Docker’s other rights or remedies, Docker reserves the right to disable or suspend Customer’s and its User’s access to the Services for any failure by Customer to pay due invoices in accordance herein.
+
+Marketplace and Reseller Purchases. Where Customer’s purchase of the Services is through a Marketplace or through a Reseller, Customer agrees to pay all fees according to the standard price list found at each Marketplace or Reseller price, including all applicable charges specified for the Services (including any charges for use in excess of authorizations). The price list is exclusive of any customs or other duty, tax, and similar levies imposed by any authority. Customer understands it will pay the applicable Marketplace or Reseller in lieu of paying Docker directly. Any agreement between Customer and a Marketplace or Reseller is solely between Customer and that Marketplace or Reseller with respect to fees and the Subscription Term, and any disputes related to such agreement shall be handled directly between Customer and the applicable Marketplace or Reseller. Customer’s acceptance of the Marketplace or Reseller pricing and terms and conditions shall bind Customer to the obligations of this Agreement and any applicable Order Form (and in the event of any conflict between this Agreement and any agreement between Customer and a Marketplace or Reseller, this Agreement shall govern as between Docker and Customer, except with respect to fees and the Subscription Term). If Customer purchases through a Marketplace or Reseller, Customer will be responsible for full payment of the Fees for the Subscription Term, regardless of other usage, payment, or billing terms between Customer and the Marketplace or Reseller such as purchase credits or volume discount tranches.
+
+Taxes and Withholding. Customer is responsible for all applicable withholding, sales or use, goods and services, value- added, consumption, or other similar fees or taxes imposed by any government (other than taxes on the net income of Docker). Accordingly, if Customer is required to withhold any taxes on the amounts payable to Docker hereunder, Customer shall pay Docker such additional amounts as are necessary to ensure receipt by Docker of the full amount that Docker would have received but for the deduction on account of such withholding. Customer shall provide Docker with official receipts issued by the appropriate governmental agency, or such other evidence as is reasonably requested by Docker to establish that such taxes have been paid. Where applicable law requires Customer to self-assess or reverse-charge any taxes, Customer shall be responsible for complying with such law. In such a case, Customer undertakes to provide Docker with its valid VAT registration number that is relevant to the Services provided under the terms of this Agreement. The amounts of any taxes required to be paid by Docker will be added to Docker’s invoice, and Customer shall promptly remit such amounts to Docker, as the collection agent, upon invoice. Docker reserves the right to disable Customer’s access to the Services for any failure to pay or any late payment.
+
+Non-Refundable and Non-Cancelable. Except as otherwise expressly set forth in this Agreement, all fees and other amounts payable by Customer under this Agreement are non-refundable, and Customer’s payment obligations are non-cancelable. All payment inquiries should be directed to receivables@docker.com.
+
+License Limitations; Use Restrictions.
+
+General License Limitations.
+
+General Limitations. Customer’s license to use the Services may be subject to certain general restrictions and limitations depending on the Services Customer has chosen, including but not limited to quantity of data stored, age of data stored, request rate (defined as the number of requests per hour to download data from Docker Hub), the number of image autobuilds, or the number of collaborators on an account, as set forth on the applicable Order Form or Documentation.
+
+Personal Service Subscriptions. ​​ Subscriptions for “personal” Services (“Personal Service Subscriptions”) are intended for individual, non-institutional use, and are subject to the following limitations:
+
+Developer Use. Use is limited to a single, individual developer acting in a personal, non-commercial capacity to develop Open Source Software or free applications as further described under this Agreement. Developer Use does not include use in connection with an individual’s employment or engagement by a company, organization, or institution (including a university, research institution, or government entity), whether paid or unpaid.
+
+Educational Use. Use is limited to individual members of an educational organization enrolled in a classroom learning environment solely for academic or research purposes, or contribution to an open source project. Educational Use does not include use by multiple individuals under a coordinated arrangement intended to achieve institutional-scale usage through aggregated personal accounts. For example, where a number of individuals affiliated with the same educational institution, department, or research group intends to use Personal Service Subscriptions in connection with a shared project, initiative, or institutional function, such use requires procurement of an appropriate paid institutional Service.
+Docker reserves the right to audit usage patterns and to determine whether any use under the Personal Service Subscriptions is allowed and to require migration to an appropriate paid Subscription upon notice.
+
+AI Configurations. With respect to Agentic Platform Services, Sandboxes, and any AI Agents, Customer is responsible for (i) configuring Sandbox Governance and enterprise controls, (ii) determining which filesystem paths and network destinations are permitted, (iii) managing Users, keys, and credentials, and (iv) ensuring that Customer Data provided to any AI Feature complies with Customer’s internal policies. It is Customer’s sole duty and responsibility to assess and determine whether the Input and Customer Data complies with its own internal policies, and is appropriate for the Agentic Platform Services.
+
+Vulnerability Scanning. The Services may include an image vulnerability scanning feature that will scan the images that Customer specifies, which may be based upon code Customer authored or code of others, and may generate vulnerability reports or other information for Customer. The data that supports this feature may be provided by a third party and Customer agrees and understands that any reports or other information that Customer receives from Docker (directly or indirectly) about possible vulnerabilities are not guaranteed to be comprehensive, and there can be no assurance that every fault or vulnerability is discovered in a particular image.
+
+Critical Systems. The Services are not designed, and Customer shall not use the Services as a basis, to deploy systems that must be hardened or highly secure except to the extent supported by DHI, or involve mission-critical business operations, the operation of nuclear facilities, aircraft navigation, important communication systems, medical devices, air traffic control devices, real time control systems, or other situations in which an inaccuracy or error in a report or in the service could lead to death, personal injury, or physical property or environmental damage.
+
+2. Specific License Limitations for Standalone use of Docker Desktop.
+
+The use of Docker Desktop without a paid subscription for Services, is further restricted (i) to use for a non-commercial open source project and/or (ii) use in a commercial undertaking with fewer than 250 employees and less than US $10,000,000 (or equivalent local currency) in annual revenue. Government Entities shall not use Docker Desktop or access other Entitlements of the Services without a paid subscription for Services.
+
+Use Restrictions. Customer and its Users may not and may not allow any third party to, directly or indirectly:
+
+Services-related Restrictions:
+
+modify, adapt, alter, translate, or create derivative works of the Services, unless expressly authorized by Docker;
+
+reverse-engineer, decompile, disassemble, or attempt to derive the source code for the Services, in whole or in part, except to the extent that such activities are permitted under applicable law;
+
+distribute, license, sublicense, lease, rent, loan, or otherwise transfer the Services to any third party;
+
+remove, alter, or obscure in any way the proprietary rights notices (including copyright, patent, and trademark notices and symbols) of Docker or its licensors or suppliers contained on or within any copies of the Services or any content posted thereon;
+
+access the Services for the purpose of developing or operating products or services intended to be offered to third parties in competition with the Services or exploit the Services for any unauthorized commercial purpose, including without limitation mirroring or replicating content for a commercial service;
+
+Use any robot, spider, site search/retrieval application, or other device to retrieve or index any portion of the Services or the content posted thereon or to collect information about its users for any unauthorized purpose;
+
+Reformat or frame any portion of the web pages that are part of the Services’ administration display;
+
+Create user accounts under fraudulent pretenses or use a service account or a Docker account created under a personal or other email domain not authorized by the Customer pursuant to this Agreement and an applicable Order Form or use no-Fee accounts to provide any services to Customer (when it’s acting under an individual subscription) to its employer and/or any commercial entity or receive such services;
+
+Use the Services if Customer is under 13 years of age (and if Customer is between the ages of 13 and 17, Customer represents and warrants that a parent or legal guardian has consented to its use of the Services).
+
+Use the Services other than as described in the applicable Documentation or for any purpose that violates a third-party’s rights or law or regulation;
+
+Use the Services, or any interfaces provided with the Services, to access any Docker product or service in a manner that violates this Agreement; or
+
+Interfere with other users’ enjoyment of the Services.
+
+Content-related Restrictions and Additional AI Agent-Related Restrictions:
+
+Send, upload, distribute, or disseminate defamatory, harassing, hate-related, abusive, violent, fraudulent, obscene, unlawful, or otherwise objectionable content (or content that promotes or encourages any of the foregoing);
+
+Distribute malware, viruses, worms, defects, Trojan horses, corrupted files, hoaxes, or any other items of a destructive or deceptive nature;
+
+Impersonate another person (via the use of an email address or otherwise) or otherwise misrepresent itself or the source of any content;
+
+Upload, post, transmit, or otherwise make available through the Services any content that infringes any patent, trademark, copyright, trade secret or other proprietary right of any third party, including but not limited to illegal peer-to-peer file sharing;
+
+Upload, post, transmit, or otherwise make available through images any trade secrets or sensitive or confidential information (including tokens, keys, and credentials) unless as determined necessary by Customer pursuant to Section 3.1(c);
+
+Download any content posted by another user that Customer knows, or reasonably should know, cannot be legally distributed in such a manner;
+
+Submit content that falsely expresses or implies that such content is sponsored or endorsed by Docker;
+
+Mine cryptocurrency using computing resources of the Services or any other Docker computing resources or load cryptocurrency mining code, scripts, or malware into any Services or any other Docker computing resources;
+
+Transfer excessive amounts of data while using the Services. If Docker determines that Customer’s bandwidth usage is significantly higher compared to other users of similar features, it may result in potential throttling or On-Demand Usage charges; or
+
+Consume excessive amounts of public data storage when using the Services.
+
+Docker may suspend Customer’s or a User’s access to and/or account for the Services, or remove, disable, or delete any Customer Data if Docker reasonably believes there has been a violation of this Section 3.3. Docker agrees to provide Customer with reasonable notice of any such suspension, disablement, or deletion before its implementation unless immediate suspension, disablement, or deletion is necessary to comply with legal process, regulation, order, or prevent imminent harm to the Services or any third party, in which case Docker will notify Customer to the extent possible and/or allowed by applicable law. If Docker suspends Customer’s right to access or use any portion of the Services, Customer remains responsible for all Fees incurred prior to the suspension and Customer will not be entitled to any credit or refund.
+
+Users and Usernames.
+
+Users. With respect to non-individual subscriptions of the Services, Customer will not allow any person or entity other than Users to use or access the Services, provided that (i) the number of Users, does not exceed the Entitlements; and (ii) Customer agrees that it will ensure that each User complies with all applicable terms and conditions of this Agreement and it is responsible for its Users’ conduct while accessing or using the Services and for any consequences thereof.
+
+Right to Reclaim. Docker reserves the right to reclaim usernames on behalf of businesses or individuals that hold legal claims or trademarks to those usernames. Users of business names and/or logos that may be considered misleading to others may be permanently suspended. Docker also reserves the right to reclaim usernames using Docker trademarks or usernames that violate our trademark guidelines, available at https://www.docker.com/legal/trademark-guidelines/, which are hereby incorporated into this Agreement by reference.
+
+No Squatting. Customer and its Users shall not engage in username squatting. Users with an account that is inactive for more than six (6) months may be terminated at Docker’s discretion and without further notice. Docker takes into account several factors when determining what conduct is considered to be username squatting including, without limitation: (i) the number of accounts created; (ii) creating accounts for the purpose of preventing others from using those account names; and (iii) creating accounts for the purpose of selling those accounts. Customer and its Users shall not buy or sell usernames.
+
+Customer Data.
+
+Ownership and License. Docker acknowledges that, as between Docker and Customer, Customer owns all right, title, and interest, including all intellectual property rights, in and to Customer Data. Customer hereby grants to Docker a non-exclusive, non-transferable (except in accordance with Section 18.1), non-sublicensable (except to contractors and service providers acting on Docker’s behalf), royalty-free, worldwide license to reproduce, distribute, modify, perform, use, and display the Customer Data during the Subscription Term solely as may be necessary for Docker to host (if applicable), provide and support the Services including updates and upgrades thereto.
+
+Representations. Customer is solely responsible for the nature, accuracy, quality, integrity, legality, reliability, and completeness of the Customer Data. In furtherance of the foregoing, Customer represents and warrants that (a) it has obtained and will obtain and continue to have, during the Subscription Term, all necessary rights, authority, and licenses for the access to and use of the Customer Data; (b) Docker’s use of the Customer Data in accordance with this Agreement will not violate any applicable laws or regulations or cause a breach of any agreement or obligations between Customer and any third party and (c) it will promptly handle and resolve any notices and claims relating to the Customer Data.
+
+Data Protection. Docker’s processing of personal information contained in Customer Data is governed by the Data Processing Agreement, available at https://www.docker.com/legal/data-processing-agreement, which is incorporated into this Agreement by reference and controls in the event of conflict with respect to such processing.
+
+Customer Data Disclaimers. Docker has no liability to Customer or any third party as a result of: (i) any unauthorized disclosure or access to an Administrator’s or User’s account or Customer Data as a result of an Administrator’s or User’s misuse of the Services or loss or theft of any Administrator or User password or username, except to the extent resulting from Docker’s gross negligence or willful misconduct, (ii) any deletion, destruction, damage, or loss of Customer Data caused by, or at the direction of, Customer, or (iii) Customer’s failure to maintain adequate security or antivirus controls in any devices used to access the Services.
+
+Deletion. For particular AI Features or Cloud Sandboxes, Docker may delete Customer’s usage history and data files older than 12 months or within 90 days of the termination of this Agreement other than for free accounts in which case such usage history and data files may be deleted within 30 days from termination. For certain AI Features offered to Free-tier Users, Docker may retain Input and Output copies for up to 30 days to operate, secure, and improve the Services; retention for other tiers (if any) is described in the Documentation.
+
+AI Features.
+
+Customer’s use of AI Features. Except in relation to the Agentic Platform Services, (a) Customer’s use of AI Features where available, will be at Customer’s discretion; and (b) the Services may be used without enabling the AI Features except as otherwise specified in the Documentation. In connection therewith, Docker may (i) use or provide its AI Features, whether proprietary or licensed to Docker (collectively, “Docker AI Features”); and/or (ii) require Customer to select, procure and enable MCP servers or third-party AI Features, each of which will be deemed a Third-Party Product.
+
+Docker AI Features. As between the parties, subject to Section 2.2, Customer retains its ownership rights to any (i) Output of any Docker AI Feature and (ii) AI Agent it develops without use of or reference or access to the Docker IP. Docker represents and warrants that it has conducted reasonable due diligence on Docker AI Features provided by third party providers, and that such providers maintain appropriate security and privacy standards consistent with industry practices. In addition to and without limiting Section 3.3, Customer will, and will cause its Users to, comply with the acceptable use policy from each applicable provider, as made available by Docker to Customer (the “AUP”).
+
+No LLM Training. Docker will not, and will not authorize any of its subcontractors or services providers to, use Customer Data to train artificial intelligence models without the Customer’s express consent at the Administrator-level of authority.
+
+Third-Party AI Products. Customer acknowledges that enabling an AI Feature may involve transmitting Input (and receiving Output) via Third-Party Products (e.g., third-party model providers or MCP Servers) selected or enabled by Customer, and such Third-Party Products are subject to their terms. Docker disclaims any responsibility and liability for Outputs from Third-Party Product providers.
+
+Compliance with AI Laws. Subject to the terms and conditions of this Agreement (including Section 4.3 with respect to personal information), Docker is responsible for compliance with AI-specific laws and regulations applicable to the provision of Docker AI Features generally (i.e., without regard to Customer’s particular use). Customer is solely responsible for compliance with laws and regulations applicable to its use of the applicable AI Features and Output generated by Customer or otherwise provided to Customer.
+
+High-Risk and Companion Use Cases. Without limiting Section 3.1(c), the AI Features and Output are not intended or designed for, and Customer will not use them for, any high-risk or unacceptable-risk AI practice, any “companion” or personified chatbot use case, or, in each case, any similar designation under applicable laws and regulations. In addition, Customer will not (and will not permit its Users to) represent that Output is human generated or approved or endorsed by Docker or its subcontractors.
+
+Output and Agentic Action Disclaimers. Notwithstanding anything contained to the contrary in this Agreement, (i) Customer acknowledges that, due to the nature of AI Features, Output is not necessarily unique, and the AI Features may generate the same or substantially similar Output for Customer or third parties and (ii) Output may not be accurate, complete, or otherwise suitable for a particular use case (and does not represent Docker’s views). CUSTOMER IS SOLELY RESPONSIBLE AND LIABLE FOR EVALUATING AND INDEPENDENTLY VERIFYING ALL OUTPUT BEFORE RELYING ON IT. To the extent any AI Feature includes agentic capabilities that can autonomously take actions, including executing code, running commands, modifying files or configurations, processing data, or accessing networks, systems or resources, Customer acknowledges that each such action is enabled, configured and initiated at Customer’s direction and under Customer’s control, and, as between the parties, Customer is solely responsible for such actions and their results, consequences, and Outputs as if Customer had performed them directly, regardless of whether the action was anticipated, authorized in advance, or foreseeable. NOTWITHSTANDING ANYTHING TO THE CONTRARY IN THIS AGREEMENT, DOCKER WILL HAVE NO LIABILITY OR RESPONSIBILITY FOR CUSTOMER’S OR ITS USERS’ USE OF OUTPUT OR ANY AUTONOMOUS OR SEMI-AUTONOMOUS ACTION.
+
+Open Source Software.
+
+Any part of the Services that contains or utilizes Open Source Software is distributed and made available under the terms of the open source license agreements referenced in the applicable distribution or the applicable help, notices, about or source files or Documentation. Copyrights and other proprietary rights to the Open Source Software are held by the copyright holders identified in the applicable distribution or the applicable help, notices, about or source files or Documentation. The Services shall not include any code licensed under any “viral” or “copyleft” license.
+
+Records and Audit.
+
+Customer shall establish and maintain complete and accurate records related to Customer and its Users’ use of the Services, and any such other information as reasonably necessary for Docker to verify compliance with the terms of this Agreement and any applicable Order Form. Upon at least ten (10) days’ prior notice to Customer, Docker or its representative may inspect such records to confirm Customer’s compliance with the terms of this Agreement and any applicable Order Form. If Customer’s records or Docker’s Services-related records reveal that Customer or Customer’s Users have exceeded their permitted use of the Services, Docker may invoice Customer for any past or ongoing underpaid amounts resulting from such excess use and Customer will promptly pay Docker such amounts upon receipt of invoice. This remedy is without prejudice to any other remedies available to Docker at law or equity or under this Agreement. To the extent Docker is obligated to do so, Docker may share audit results with certain of its third-party licensors or assign the audit rights specified herein to such licensors.
+
+Term and Termination.
+
+Subscription Term and Renewal. The length of the initial term is set forth in the applicable Order Form (the “Initial Term”). The Initial Term will automatically renew for additional 12-month periods unless a party provides at least 30 days’ written notice prior to the end of the then-current term that such party does not wish to renew for the upcoming term (the Initial Term, together with any applicable renewal term, the “Subscription Term”). In the case of non-renewal by Customer, notice of non-renewal by email shall be sent to sales@docker.com. Customer agrees and understands that if they purchased the Services via a Reseller or Marketplace, upon auto-renewal the Services may automatically renew via a direct invoice subject to that Reseller’s or Marketplace’s renewal terms. Upon renewal, Customer shall pay the fees set forth in the applicable renewal Order Form.
+
+Termination. Either party may terminate any Order Form or this Agreement if the other party materially breaches the terms and conditions of such Order Form or this Agreement and fails to cure such breach within 30 days of receiving written notice thereof. If there are no outstanding Order Forms, either party may terminate this Agreement upon at least 30 days’ prior written notice to the other party.
+
+Effect of Termination. Upon the expiration or termination of an applicable Order Form or this Agreement, (i) all fees owed by Customer to Docker pursuant to such Order Form or this Agreement (as applicable) will be immediately due and (ii) the license to the Services will automatically terminate and Customer will discontinue all use of the Services, in each case, with respect to such Order Form or under this Agreement (as applicable). Sections 2.1, 2.2, 2.5, 3.1, 3.2, 3.4, 4, 6, 7, 8, 10, 12, 13, 14, 17, and 18.2 shall survive any termination or expiration of this Agreement.
+
+Feedback.
+
+Upon submitting any Customer or User suggestions, proposals, ideas, recommendations, bug reports, improvements, or other feedback regarding Docker’s products and services (“Feedback”), Customer hereby grants to Docker a royalty-free, fully paid, non-exclusive, transferable, sub-licensable, irrevocable, perpetual, worldwide right and license to make, use, sell, offer for sale, import, and otherwise exploit feedback (including by incorporation of such feedback into any Docker Services) without restriction.
+
+Confidentiality.
+
+Definition. “Confidential Information” means any information disclosed by one party (“Discloser”) to the other (“Recipient”), directly or indirectly, in writing, orally or by inspection of tangible objects, which is designated as “Confidential,” “Proprietary” or some similar designation, or received or learned by Recipient under circumstances in which such information would reasonably be understood to be confidential. The Services and Documentation constitute Docker Confidential Information.
+
+Exceptions. The confidentiality obligations in this Section 10 shall not apply with respect to any information which Recipient can demonstrate: (a) was in the public domain at the time it was disclosed to Recipient or has become in the public domain through no act or omission of Recipient; (b) was known to Recipient, without restriction, at the time of disclosure as shown by the files of Recipient in existence at the time of disclosure; (c) was disclosed by Recipient with the prior written approval of Discloser; (d) was independently developed by Recipient without any use of Discloser’s Confidential Information; or (e) became known to Recipient, without restriction, from a source other than Discloser without breach of this Agreement by Recipient and otherwise not knowingly in violation of Discloser’s rights.
+
+Restrictions on Use and Disclosure. Recipient agrees not to use Discloser’s Confidential Information or disclose, distribute, or disseminate Discloser’s Confidential Information except in furtherance of the performance of its obligations or in connection with its exercise or enforcement of its rights hereunder or as otherwise expressly agreed by Discloser in writing. Recipient agrees to restrict access to such Confidential Information to those employees, agents, contractors, or consultants of Recipient who need to know such Confidential Information for performing as contemplated hereunder and are bound by confidentiality obligations no less protective than those contained in this Agreement. Recipient shall exercise the same degree of care to prevent unauthorized use or disclosure of Discloser’s Confidential Information to others as it takes to preserve and safeguard its own information of like importance, but in no event less than reasonable care.
+
+Compelled Disclosure. If Recipient is compelled by a court or other competent authority or applicable law to disclose Confidential Information of Discloser, it shall, to the extent permitted by applicable law, give Discloser prompt written notice and shall provide Discloser with reasonable cooperation at Discloser’s expense so that Discloser may take steps to oppose such disclosure or obtain a protective order. Recipient shall not be in breach of its obligations in this Section 10 if it makes any legally compelled disclosure provided that Recipient meets the foregoing notice and cooperation requirements.
+
+Injunctive Relief. Recipient acknowledges that breach of the confidentiality obligations may cause irreparable harm to Discloser, the extent of which may be difficult to ascertain. Accordingly, Recipient agrees that Discloser may be entitled to seek immediate injunctive relief in the event of breach of an obligation of confidentiality by Recipient, and that Discloser shall not be required to post a bond or show irreparable harm in order to obtain such injunctive relief.
+
+Return of Confidential Information. As between the parties, Confidential Information shall remain the property of the Discloser. Within 30 days after termination of this Agreement, Recipient shall (i) promptly return all tangible materials containing such Confidential Information to Discloser, and (ii) remove all Confidential Information (and any copies thereof) from any computer systems of the Recipient and confirm in writing that all materials containing Confidential Information have been deleted or returned to Discloser, as applicable, by Recipient. Recipient shall cause its affiliates, agents, contractors, and employees to comply with the foregoing. This section 10.6. does not apply to Customer Data subject to Section 4.5.
+
+Security.
+
+Docker will maintain reasonable administrative, physical, and technical security measures consistent with applicable law that are intended to protect against the loss, misuse, unauthorized access, alteration or disclosure of Customer Data or the Services. Such additional measures will include compliance with the Security and Privacy Guidelines available at https://www.docker.com/trust/. Docker shall notify Customer of any confirmed security breach without undue delay, and as possible within twenty-four (24) hours of a confirmed breach involving Customer Data.
+
+General Warranty Disclaimer.
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, CUSTOMER UNDERSTANDS AND AGREES THAT USE OF THE SERVICES AND OUTPUT IS AT CUSTOMER’S SOLE RISK AND THAT THE SERVICES, OUTPUT, AND DOCUMENTATION IS PROVIDED “AS IS” AND “AS AVAILABLE.” NEITHER DOCKER NOR ITS AFFILIATES MAKE ANY EXPRESS WARRANTIES AND EACH DISCLAIMS ALL IMPLIED WARRANTIES REGARDING THE SERVICES OR OUTPUT, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT, TOGETHER WITH ANY AND ALL WARRANTIES ARISING FROM COURSE OF DEALING OR USAGE IN TRADE. NO ADVICE OR INFORMATION, WHETHER ORAL OR WRITTEN, OBTAINED FROM DOCKER OR ELSEWHERE SHALL CREATE ANY WARRANTY NOT EXPRESSLY STATED IN THIS AGREEMENT. WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, DOCKER AND ITS AFFILIATES DO NOT REPRESENT OR WARRANT TO CUSTOMER THAT: (A) CUSTOMER’S USE OF THE SERVICES OR OUTPUT WILL MEET CUSTOMER’S REQUIREMENTS, OR (B) CUSTOMER’S USE OF THE SERVICE OR OUTPUT WILL BE UNINTERRUPTED, TIMELY, SECURE, OR FREE FROM ERROR. NOTWITHSTANDING THE FOREGOING, NOTHING HEREIN SHALL EXCLUDE OR LIMIT DOCKER’S WARRANTY OR LIABILITY FOR LOSSES WHICH MAY NOT BE LAWFULLY EXCLUDED OR LIMITED BY APPLICABLE LAW. CUSTOMER UNDERSTANDS AND ACKNOWLEDGES THAT THE SERVICES ARE NOT DESIGNED, INTENDED, OR WARRANTED FOR USE IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE CONTROLS, INCLUDING WITHOUT LIMITATION, OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, AND LIFE SUPPORT OR WEAPONS SYSTEMS. DOCKER DOES NOT WARRANT ANY THIRD PARTY PRODUCTS OR SERVICES.
+
+Indemnification.
+
+By Docker. Subject to the terms and conditions of this Agreement, Docker shall defend at its own expense any legal action brought against Customer to the extent that it is based on a third-party claim or allegation that the Services (excluding any Open Source Software) infringe a U.S. patent or copyright of such third party, and Docker will pay any costs and damages awarded against Customer in any such action, or agreed to under a settlement signed by Docker, that are attributable to any such claim but shall not be responsible for any compromise made or expense incurred without Docker’s consent.
+
+Limitation on Infringement Claims. Docker will have no liability to Customer or any obligations under this Section 13 to the extent a claim arises out of: (a) the modification of any portion of the Services by any party other than Docker or its authorized representatives, including (i) any fine-tuning, retraining, adaption, or customization of any AI Feature or AI Agent functionality forming part of the Services, carried out by or on behalf of Customer; or (ii) any alteration of the Services’ behavior resulting from Input, including Customer-supplied system prompts or action configurations provided to an AI Agent or AI Feature; (b) the combination, operation, or use of any Services with other product(s), data, third-party software, or services where the Services would not by themselves be infringing (including, without limitation, Open Source Software); (c) the continued use of the allegedly infringing Services after being notified of the infringement claim or after being provided a modified version of the Services by Docker to address any alleged infringement; (d) the failure to use the Services in accordance with the applicable Documentation or outside the scope of the rights granted under this Agreement; or (e) any Open Source Software, third-party AI Features, or Output generated, action taken, or omission by an AI Agent or AI Feature, including any decision, recommendation, code execution, or command performed autonomously or semi-autonomously, whether or not initiated by Input.
+
+Remediations. Should the Services, or the operation thereof, become or in Docker’s opinion be likely to become, the subject of such claim described in Section 13.1, Docker may, at its option and expense, (i) procure the right for Customer to continue using the Services, or (ii) replace or modify the Services so that they become non-infringing Services. If neither (i) or (ii) are reasonably practicable, Docker may terminate the applicable Order Form and refund to Customer any pre-paid, unused Fees paid by Customer corresponding to the unused period of the Subscription Term. THIS SECTION 13 STATES DOCKER’S SOLE AND EXCLUSIVE LIABILITY, AND CUSTOMER’S SOLE AND EXCLUSIVE REMEDY, WITH RESPECT TO INFRINGEMENT OR MISAPPROPRIATION OF INTELLECTUAL PROPERTY RIGHTS OF ANY KIND.
+
+By Customer. Customer shall defend and hold Docker and its affiliates, officers, directors, agents, and employees (“Docker Indemnitees”) harmless against any third party claims and actions arising from (a) an allegation that Customer Data infringes the intellectual property rights or otherwise violates proprietary or privacy rights of any third party, (b) any use by Customer or its Users of the Services in violation of the license restrictions in Section 3.3 of this Agreement or an AUP, and (c) any claim by a third party arising from or relating to any action, Output, omission, or decision by an AI Agent or AI Feature operating on behalf of, or initiated by, Customer or its Users, including claims arising from code execution, data processing, network access, or communications performed by an AI Agent within a Sandbox or other environment made available through the Services, and in each case of (a) through (c), Customer shall indemnify the Docker Indemnitees against any damages, judgments, litigation costs including any reasonable attorneys’ fees arising therefrom.
+
+Procedure. The party seeking indemnification will notify the indemnifying party promptly of any claim or action covered by this Section 13. The parties agree to reasonably cooperate during such proceedings. The indemnifying party will have the right to defend any such claim and will have control over the litigation, negotiation, and settlement of any such claim, provided it will not make any settlement of a claim that results in any liability or imposes any obligation on the indemnified party without the prior written consent of such party, which will not be unreasonably withheld. The indemnified party may, at its sole expense, participate in the defense of any claim.
+
+Limitation of Liability.
+
+Exclusion of Damages. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, CUSTOMER EXPRESSLY UNDERSTANDS AND AGREES THAT DOCKER, ITS AFFILIATES, AND ITS LICENSORS SHALL IN NO EVENT BE LIABLE TO CUSTOMER FOR ANY INCIDENTAL, INDIRECT, SPECIAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION LOSS OF PROFITS, GOODWILL, LOSS OF USE, LOST DATA, FAILURE OF SECURITY MECHANISMS, OR INTERRUPTION OF BUSINESS) ARISING FROM THIS AGREEMENT, WHETHER UNDER THEORY OF CONTRACT, TORT, INCLUDING NEGLIGENCE, OR OTHERWISE, EVEN IF CUSTOMER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES IN ADVANCE.
+
+Liability Cap. THE TOTAL AGGREGATE LIABILITY OF DOCKER ARISING OUT OF OR RELATED TO THIS AGREEMENT WILL NOT EXCEED THE AMOUNTS PAID BY CUSTOMER FOR THE RELEVANT SERVICE UNDER THE APPLICABLE ORDER FORM IN THE TWELVE (12) MONTH PERIOD IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE LIABILITY.
+
+Export Restrictions.
+
+Customer understands that the Services are subject to United States export controls administered by the United States Department of Commerce and the United States Department of Treasury Office of Foreign Assets Control. Customer acknowledges and agrees that the Services may not be used, transferred or otherwise exported or re-exported to countries as to which the United States, maintains an embargo (collectively, “Embargoed Countries”), or to or by a national or resident thereof, or any person or entity on the U.S. Department of Treasury’s List of Specially Designated Nationals or the U.S. Department of Commerce’s Entity List, Denied Persons List, or Unverified List, or the U.S. Department of State’s Nonproliferation Sanctions list (collectively, “Designated Nationals”). The lists of Embargoed Countries and Designated Nationals are subject to change without notice. By using the Services, Customer represents and warrants that Customer is not located in, under the control of, or a national or resident of an Embargoed Country or Designated National. Customer agrees to comply with all United States export laws and assumes sole responsibility for obtaining United States government export licenses to export or re-export as may be required. Customer will defend, indemnify, and hold Docker and its licensors harmless from and against any liabilities arising from Customer’s or any of its officers, directors, employees, agents, or representatives’ violation of such laws or regulations.
+
+U.S. Public Sector Users.
+
+Any United States government entity, including state, local, or public education entities created by the laws (including constitution or statute) of a U.S. state or commonwealth that uses Docker Services is subject to the Public Sector Subscription Service Agreement available at https://www.docker.com/static/Docker-Public-Sector-SSA.pdf. Such users are not entitled to use no-Fee Services.
+
+17. Governing Law and Jurisdiction.
+
+The Agreement and all of its Order Forms will be governed as follows:
+
+For Docker Personal and any other no-Fee Subscription accounts:
+
+Governing law:
+
+Courts with exclusive jurisdiction:
+
+The laws of the State of California and controlling United States federal law.
+
+The state and federal courts located within the county of Santa Clara, California. Any dispute, controversy or claim arising under, out of or relating to this Agreement, will be finally determined by arbitration conducted by JAMS (or, if unavailable, then such other similar group that can provide former judges as arbiters) in accordance with the JAMS Arbitration Rules and Procedures by a single arbiter who is (a) fluent in written and spoken English, the language governing this Agreement, and (b) skilled and experienced with cloud or internet services. The place of such arbitration will be in Santa Clara County, California, U.S.A. The judgment of the arbitrator will be final, non-appealable (to the extent not inconsistent with applicable law) and binding upon the parties, and may be entered in any court of competent jurisdiction. The foregoing does not limit or restrict either party from seeking injunctive or other equitable relief from a court of competent jurisdiction.
+
+For all Service accounts subject to Fees the Agreement will be governed as follows based on the Customer’s place of domicile:
+
+Customer’s domicile:
+
+Governing law:
+
+Courts with exclusive jurisdiction:
+
+In the Americas, Asia Pacific, India, Israel and any other region other than as specified below.
+
+The laws of the State of California and controlling United States federal law.
+
+The state and federal courts located within the county of Santa Clara, California. Any dispute, controversy or claim arising under, out of or relating to this Agreement, will be finally determined by arbitration conducted by JAMS (or, if unavailable, then such other similar group that can provide former judges as arbiters) in accordance with the JAMS Arbitration Rules and Procedures by a single arbiter who is (a) fluent in written and spoken English, the language governing this Agreement, and (b) skilled and experienced with cloud or internet services. The place of such arbitration will be in Santa Clara County, California, U.S.A. The judgment of the arbitrator will be final, non-appealable (to the extent not inconsistent with applicable law) and binding upon the parties, and may be entered in any court of competent jurisdiction. The foregoing does not limit or restrict either party from seeking injunctive or other equitable relief from a court of competent jurisdiction.
+
+In the European Union, the European Economic Area, Switzerland, Africa or the Middle East (other than Israel).
+
+The laws of the Netherlands.
+
+The courts of Utrecht, albeit not until the parties have pursued the IT Mediation Regulations of the Stichting Geschillenoplossing Automatisering (SGOA) in The Hague. The parties agree to participate in the mediation in good faith, and to share its costs equally.
+
+In the United Kingdom.
+
+The laws of England and Wales.
+
+Any dispute arising out of or in connection with this contract, including any question regarding its existence, validity or termination, shall be referred to and finally resolved by arbitration under the London Court of International Arbitration (LCIA) Rules, which Rules are deemed to be incorporated by reference into this clause.
+
+The number of arbitrators shall be one.
+
+The seat, or legal place, of arbitration shall be London. The language to be used in the arbitral proceedings shall be English.
+
+The parties agree that the Uniform Computer Information Transactions Act and the United Nations Convention on the International Sale of Goods will not apply to this Agreement.
+
+Miscellaneous.
+
+Assignment. Neither party may assign any of its rights or obligations under this Agreement, whether by operation of law or otherwise, without the prior written consent of the other party (not to be unreasonably withheld), provided that Docker may assign this Agreement, without Customer’s consent, to an affiliate or in connection with a merger, acquisition, corporate reorganization, or sale of all or substantially all of its assets. Any attempt to assign this Agreement without such consent will be void. Subject to the foregoing, this Agreement is binding upon and will inure to the benefit of each of the parties and their respective successors and permitted assigns.
+
+Legal Notices. Any notices hereunder must be in writing. Docker may provide notice to Customer through Customer’s signup email address, the address provided in the applicable Order Form, customer’s account or in-product notifications. Customer agrees that any electronic communication will satisfy any applicable legal communication requirements, including that such communications be in writing. Any notice to Customer will be deemed given upon the first business day after Docker sends it. Customer will provide notice to Docker by mail to: Docker, Inc. 3790 El Camino Real Ste. 1052 Palo Alto, CA, 94306-3314, Attn: Legal Department, with an email copy to Legal@docker.com.
+
+Publicity. Docker may identify Customer as a customer in its promotional materials, including using its logo. Docker will promptly cease upon Customer request to customer_marketing@docker.com.
+
+Changes to the Terms. Docker may modify these terms from time to time, with notice to Customer in accordance with Section 18.2 (Legal Notices) or by posting the modified terms on our website. Together with notice, Docker will specify the effective date of the modifications.
+
+Contractual Relationship. The parties are independent contractors. This Agreement shall not establish any relationship of partnership, joint venture, employment, franchise, or agency between the parties.
+
+Integration and Order of Precedence. This Agreement, including all Order Forms, constitutes the entire agreement between Customer and Docker concerning the subject matter of this Agreement and it supersedes all prior and simultaneous proposals, agreements, understandings, or other communications between the parties, oral or written, regarding such subject matter, including any prior Agreement between the parties. The terms of an Order Form will prevail over the general terms herein only if such Order Form expressly references this Agreement, the intent to prevail over this Agreement, and is authorized by both Docker and Customer. Section headings are for convenience only and shall not affect interpretation of the relevant section. No provision of any purchase order or other form employed or provided by Customer will supersede the terms and conditions of this Agreement, and any such document relating to this Agreement shall be for administrative purposes only and shall have no legal effect. If any provision of this Agreement is held invalid or unenforceable, the remainder of this Agreement will continue in full force and effect.
+
+Force Majeure. Except for the inability to meet financial obligations, neither party will be liable for failures or delays in performance due to causes beyond its reasonable control, including, but not limited to, any act of God, fire, earthquake, flood, storm, natural disaster, computer-related attacks, hacking, internet service provider failures or delays, accident, pandemic, labor unrest, civil disobedience, act of terrorism, or act of government (each a “Force Majeure Event”). The parties agree to use their best efforts to minimize the effects of such failures or delays. For the avoidance of doubt, Customer understands that the Services may not be provided in countries listed in the Office of Foreign Assets Control sanction list and Customer’s access to the Services may be restricted in such countries. Such prohibitions shall not constitute a Force Majeure Event.
+
+No-waiver. No waiver will be implied from conduct or failure to enforce or exercise rights under this Agreement, nor will any waiver be effective unless in a writing signed by a duly authorized representative on behalf of the party claimed to have waived.
+
+No Third-party Beneficiaries. Nothing in this Agreement shall confer, or is intended to confer, on any third party any benefit or the right to enforce any term of this Agreement.
