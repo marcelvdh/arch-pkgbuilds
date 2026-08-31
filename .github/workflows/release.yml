@@ -46,6 +46,8 @@ jobs:
     needs: discover
     permissions:
       contents: write
+    concurrency:
+      group: release-${{ matrix.package }}   # a duplicate trigger must queue, not race
     strategy:
       fail-fast: false
       matrix:
@@ -86,14 +88,13 @@ jobs:
           tag: ${{ steps.r.outputs.tag }}
           ver: ${{ steps.r.outputs.ver }}
         run: |
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
-            gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
-          else
-            gh release create "$tag" --target "$GITHUB_SHA" \
-              --title "$tag" --notes "$pkg $ver" \
-              packages/$pkg/*.pkg.tar.zst
-          fi
+          # Create empty, then upload. Passing assets to `gh release create`
+          # makes it publish a draft, upload, then un-draft: a failed upload
+          # strands an untagged draft, and two runs racing land on the same one.
+          gh release view "$tag" >/dev/null 2>&1 \
+            || gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes "$pkg $ver"
+          gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
+          gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
 
   # Regenerate the pacman repository: the rolling release "repo" carries every
   # package at its current pkgver plus the repo-add database, so users can point
@@ -128,6 +129,10 @@ jobs:
             gh release download "$pkg/v$ver" --pattern '*.pkg.tar.zst' --dir repo \
               || echo "::warning::$pkg/v$ver has no release; leaving it out of the repo db"
           done
+          # Publishing an empty database would drop every package from the live
+          # repo, so treat downloading nothing as a failure rather than a sync.
+          ls repo/*.pkg.tar.zst >/dev/null 2>&1 \
+            || { echo "::error::no packages downloaded; refusing to rebuild the database"; exit 1; }
           cd repo
           for f in *.pkg.tar.zst; do
             gpg --batch --yes --detach-sign "$f"
