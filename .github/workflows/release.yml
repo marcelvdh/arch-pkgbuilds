@@ -102,6 +102,7 @@ jobs:
       group: pacman-repo
     env:
       GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed git github-cli
