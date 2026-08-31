@@ -26,9 +26,8 @@ jobs:
   update:
     needs: discover
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
+      issues: write        # the app token opens the PR; this is for Report failure
     strategy:
       fail-fast: false
       matrix:
@@ -69,10 +68,23 @@ jobs:
           sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
+      # A PR opened with GITHUB_TOKEN can't start workflow runs — GitHub blocks
+      # that to stop a workflow triggering itself — so its checks sit unstarted
+      # waiting to be approved by hand. An app token is a distinct identity and
+      # has no such limit.
+      - name: Mint app token
+        id: token
+        if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.UPDATER_APP_ID }}
+          private-key: ${{ secrets.UPDATER_APP_PRIVATE_KEY }}
+
       - name: Open pull request
         if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
         env:
           new: ${{ steps.up.outputs.new }}
+          GH_TOKEN: ${{ steps.token.outputs.token }}
         run: |
           branch="autoupdate/$pkg-$new"
           if gh pr list --head "$branch" --state open | grep -q .; then

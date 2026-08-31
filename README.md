@@ -54,6 +54,13 @@ makepkg -si
 | `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
 | `release.yml` | merge to `main` touching a PKGBUILD / tag `<name>/v*` / manual | builds the package, attaches it to a GitHub Release, and refreshes the pacman repo database |
 
+`update.yml` opens its PRs with a GitHub App token, from the `UPDATER_APP_ID`
+and `UPDATER_APP_PRIVATE_KEY` secrets. This is not about privilege — a PR opened
+with the built-in `GITHUB_TOKEN` is barred from starting workflow runs, so its
+checks sit there waiting to be approved by hand. Grant the app **Contents:
+read & write** and **Pull requests: read & write** on this repo. Without the
+secrets the nightly still checks, verifies and builds; only the PR step fails.
+
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in
 `updaters/<name>.sh`, run with the package folder as its working directory.
