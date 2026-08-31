@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Run with cwd = the package's folder. Cross-checks the PKGBUILD's tarball
-# checksum against the checksums.txt Docker publishes per build revision.
+# checksum against the checksums.txt Docker publishes per build revision. That
+# file is unsigned and served from the same host as the tarball, so this
+# catches a bad download, not a compromised publisher.
 set -euo pipefail
 
 rev="$(grep -oPm1 '^_revision=\K.*' PKGBUILD)"

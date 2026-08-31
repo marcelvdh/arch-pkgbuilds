@@ -1,8 +1,12 @@
 # Pinned upstream signing keys
 
-Used by `verifiers/*.sh` (via `scripts/apt-sha256.sh`) to verify signed apt
-metadata. Each key is vendored byte-for-byte from the URL the vendor's own
-documentation tells users to download it from.
+Used by `scripts/apt-index.sh` — on behalf of both `updaters/*.sh` and
+`verifiers/*.sh` — to verify signed apt metadata. Only `google-chrome` and
+`claude-desktop` are distributed this way; the other packages are cross-checked
+against unsigned checksum files (see the README).
+
+Each key is vendored byte-for-byte from the URL the vendor's own documentation
+tells users to download it from.
 
 | File | Owner (uid) | Primary fingerprint | Downloaded from | Documented at |
 |---|---|---|---|---|

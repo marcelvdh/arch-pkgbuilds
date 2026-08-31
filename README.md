@@ -56,12 +56,30 @@ makepkg -si
 
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in
-`updaters/<name>.sh` (apt-index packages share `scripts/apt-latest.sh`), run with
-the package folder as its working directory. `verifiers/<name>.sh` (same
-contract) cross-checks the PKGBUILD sums against the checksums upstream
-publishes — signed apt metadata verified with the keys pinned in `keys/` where
-available — so a nightly bump only becomes a PR if upstream's published hash
-agrees with what CI downloaded.
+`updaters/<name>.sh`, run with the package folder as its working directory.
+`verifiers/<name>.sh` (same contract) cross-checks the PKGBUILD sums against the
+checksums upstream publishes; all three workflows run it, so nothing builds,
+releases or reaches the pacman repo on a sum nobody checked. Both share
+`scripts/apt-index.sh` for apt-hosted packages, which fetches the `Packages`
+index once and verifies its InRelease signature against the keys pinned in
+`keys/`.
+
+Two levels of trust hide behind the word "verified", and it is worth being
+precise about which one a package gets:
+
+| Package | Cross-checked against | Signed? |
+|---|---|---|
+| `google-chrome`, `claude-desktop` | apt `InRelease` → `Packages` → `.deb` | yes, against a pinned key |
+| `claude-code`, `docker-desktop`, `docker-sbx`, `winbox` | a checksum file next to the artifact | no |
+
+The unsigned ones catch a corrupt or truncated download, and they catch
+`updpkgsums` hashing something other than what upstream meant to ship. They do
+not defend against a compromised CDN or publisher account: whoever can serve the
+bad artifact can serve a matching hash. Only the signed apt path does that.
+
+An apt index only lists the current version, so a verifier that finds no
+checksum for the pinned version reports it and passes — that is a superseded
+release, not a mismatch. A signature or network failure still fails hard.
 
 ## Release a package
 
@@ -84,3 +102,5 @@ the workflows auto-discover `packages/*/`, so there are no lists to edit. For
 nightly version-bump PRs, add an `updaters/<name>.sh` that bumps its PKGBUILD to
 the latest upstream version (optional; runs with the package folder as cwd), and
 a `verifiers/<name>.sh` if upstream publishes checksums worth cross-checking.
+Both are optional, but a package with no verifier logs a CI warning every time
+it builds.

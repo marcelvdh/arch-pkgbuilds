@@ -75,6 +75,9 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "ver=${tag##*/v}" >> "$GITHUB_OUTPUT"
 
+      - name: Verify upstream checksums
+        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
+
       - name: Build
         run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
 

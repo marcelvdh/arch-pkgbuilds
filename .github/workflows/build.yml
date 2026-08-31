@@ -56,6 +56,11 @@ jobs:
 
       - uses: ./.github/actions/setup-arch
 
+      - name: Verify upstream checksums
+        env:
+          pkg: ${{ matrix.package }}
+        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
+
       - name: Build and lint
         env:
           pkg: ${{ matrix.package }}

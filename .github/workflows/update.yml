@@ -65,9 +65,7 @@ jobs:
           sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"
           # Cross-check the new sums against the checksums upstream publishes
           # (signed apt metadata where available) before spending a build on them
-          if [ -f "verifiers/$pkg.sh" ]; then
-            sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/verifiers/$pkg.sh'"
-          fi
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
           sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
