@@ -14,6 +14,31 @@ CI as artifacts.
 | `docker-sbx` | forked from AUR |
 | `winbox` | forked from AUR |
 
+## Install via pacman
+
+One time per machine, import the signing key and trust it locally:
+
+```sh
+curl -LO https://raw.githubusercontent.com/marcelvdh/arch-pkgbuilds/main/arch-pkgbuilds.pub
+sudo pacman-key --add arch-pkgbuilds.pub
+sudo pacman-key --lsign-key FINGERPRINT
+```
+
+Then append to `/etc/pacman.conf`:
+
+```ini
+[arch-pkgbuilds]
+SigLevel = Required
+Server = https://github.com/marcelvdh/arch-pkgbuilds/releases/download/repo
+```
+
+Then `pacman -Syu` to sync and `pacman -S <package>` to install; installed
+packages upgrade with the rest of the system from then on. The `repo` rolling
+release carries the repo database and every package at its current `pkgver`,
+refreshed by `release.yml` after each release. Packages and the database are
+signed in CI with the key above (`arch-pkgbuilds.pub`, private half held only
+as an Actions secret), so pacman rejects anything not signed by it.
+
 ## Build one locally
 
 ```sh
@@ -27,7 +52,7 @@ makepkg -si
 |---|---|---|
 | `build.yml` | PR / push | builds every package in an Arch container and uploads each as an artifact |
 | `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
-| `release.yml` | merge to `main` touching a PKGBUILD / tag `<name>/v*` / manual | builds the package and attaches it to a GitHub Release |
+| `release.yml` | merge to `main` touching a PKGBUILD / tag `<name>/v*` / manual | builds the package, attaches it to a GitHub Release, and refreshes the pacman repo database |
 
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in

@@ -89,3 +89,61 @@ jobs:
               --title "$tag" --notes "$pkg $ver" \
               packages/$pkg/*.pkg.tar.zst
           fi
+
+  # Regenerate the pacman repository: the rolling release "repo" carries every
+  # package at its current pkgver plus the repo-add database, so users can point
+  # pacman.conf at it (see README). Full sync each time — idempotent, self-healing.
+  repo:
+    needs: release
+    if: ${{ !cancelled() }}     # sync what did release even if one package failed
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    concurrency:
+      group: pacman-repo
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git github-cli
+
+      - uses: actions/checkout@v4
+
+      - name: Build repo database
+        env:
+          signing_key: ${{ secrets.SIGNING_KEY }}
+        run: |
+          gpg --batch --import <<<"$signing_key"
+          mkdir repo
+          for path in packages/*/; do
+            pkg="$(basename "$path")"
+            ver="$(grep -oP '^pkgver=\K.*' "$path/PKGBUILD")"
+            gh release download "$pkg/v$ver" --pattern '*.pkg.tar.zst' --dir repo \
+              || echo "::warning::$pkg/v$ver has no release; leaving it out of the repo db"
+          done
+          cd repo
+          for f in *.pkg.tar.zst; do
+            gpg --batch --yes --detach-sign "$f"
+          done
+          repo-add --sign arch-pkgbuilds.db.tar.gz ./*.pkg.tar.zst
+          # pacman fetches the .db/.files names; releases can't hold symlinks, so copy
+          cp arch-pkgbuilds.db.tar.gz arch-pkgbuilds.db
+          cp arch-pkgbuilds.db.tar.gz.sig arch-pkgbuilds.db.sig
+          cp arch-pkgbuilds.files.tar.gz arch-pkgbuilds.files
+          cp arch-pkgbuilds.files.tar.gz.sig arch-pkgbuilds.files.sig
+
+      - name: Publish to rolling release
+        run: |
+          assets="$(gh release view repo --json assets --jq '.assets[] | "\(.name) \(.size)"' 2>/dev/null)" \
+            || gh release create repo --latest=false \
+                 --title "Pacman repository" \
+                 --notes "Rolling release backing the pacman repository — see the README."
+          # drop assets this sync no longer carries
+          for name in $(cut -d' ' -f1 <<<"$assets"); do
+            [ -e "repo/$name" ] || gh release delete-asset repo "$name" -y
+          done
+          # packages are version-stamped: skip any already up there (name and size match)
+          for f in repo/*.pkg.tar.zst*; do
+            grep -qxF "$(basename "$f") $(stat -c%s "$f")" <<<"$assets" \
+              || gh release upload repo "$f" --clobber
+          done
+          gh release upload repo repo/arch-pkgbuilds.db* repo/arch-pkgbuilds.files* --clobber
