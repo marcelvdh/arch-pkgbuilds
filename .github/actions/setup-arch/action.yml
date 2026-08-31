@@ -6,7 +6,7 @@ runs:
   steps:
     - name: Install toolchain
       shell: bash
-      run: pacman -S --noconfirm --needed base-devel pacman-contrib namcap sudo github-cli
+      run: pacman -S --noconfirm --needed base-devel pacman-contrib namcap sudo github-cli jq
 
     - name: Prepare build user
       shell: bash

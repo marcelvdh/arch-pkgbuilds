@@ -11,9 +11,7 @@ on:
         default: true
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+  contents: read
 
 jobs:
   discover:
@@ -21,12 +19,16 @@ jobs:
     outputs:
       packages: ${{ steps.l.outputs.packages }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - id: l
         run: echo "packages=$(bash scripts/list-packages.sh)" >> "$GITHUB_OUTPUT"
 
   update:
     needs: discover
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +44,7 @@ jobs:
       - name: Install git                # checkout and the setup action need it
         run: pacman -Syu --noconfirm --needed git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: ./.github/actions/setup-arch
 
@@ -60,7 +62,13 @@ jobs:
             echo "Already up to date."
             exit 0
           fi
-          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"
+          # Cross-check the new sums against the checksums upstream publishes
+          # (signed apt metadata where available) before spending a build on them
+          if [ -f "verifiers/$pkg.sh" ]; then
+            sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/verifiers/$pkg.sh'"
+          fi
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
       - name: Open pull request
@@ -92,7 +100,7 @@ jobs:
 
       - name: Upload built package
         if: steps.up.outputs.new != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.package }}-${{ steps.up.outputs.new }}
           path: ${{ github.workspace }}/packages/${{ matrix.package }}/*.pkg.tar.zst

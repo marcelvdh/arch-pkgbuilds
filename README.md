@@ -57,7 +57,11 @@ makepkg -si
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in
 `updaters/<name>.sh` (apt-index packages share `scripts/apt-latest.sh`), run with
-the package folder as its working directory.
+the package folder as its working directory. `verifiers/<name>.sh` (same
+contract) cross-checks the PKGBUILD sums against the checksums upstream
+publishes — signed apt metadata verified with the keys pinned in `keys/` where
+available — so a nightly bump only becomes a PR if upstream's published hash
+agrees with what CI downloaded.
 
 ## Release a package
 
@@ -78,4 +82,5 @@ scripts/add-aur.sh <name>     # vendors packages/<name>/ from the AUR
 Review the PKGBUILD — you own the copy now. It builds and releases immediately;
 the workflows auto-discover `packages/*/`, so there are no lists to edit. For
 nightly version-bump PRs, add an `updaters/<name>.sh` that bumps its PKGBUILD to
-the latest upstream version (optional; runs with the package folder as cwd).
+the latest upstream version (optional; runs with the package folder as cwd), and
+a `verifiers/<name>.sh` if upstream publishes checksums worth cross-checking.

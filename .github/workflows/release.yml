@@ -16,7 +16,7 @@ on:
         required: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   discover:
@@ -24,7 +24,7 @@ jobs:
     outputs:
       packages: ${{ steps.l.outputs.packages }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - id: l
@@ -44,6 +44,8 @@ jobs:
 
   release:
     needs: discover
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +59,7 @@ jobs:
       - name: Install git                # checkout and the setup action need it
         run: pacman -Syu --noconfirm --needed git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: ./.github/actions/setup-arch
 
@@ -96,6 +98,8 @@ jobs:
   repo:
     needs: release
     if: ${{ !cancelled() }}     # sync what did release even if one package failed
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     container: archlinux:latest
     concurrency:
@@ -107,7 +111,7 @@ jobs:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed git github-cli
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Build repo database
         env:
