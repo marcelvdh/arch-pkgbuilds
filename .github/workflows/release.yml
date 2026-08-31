@@ -126,7 +126,9 @@ jobs:
             gpg --batch --yes --detach-sign "$f"
           done
           repo-add --sign arch-pkgbuilds.db.tar.gz ./*.pkg.tar.zst
-          # pacman fetches the .db/.files names; releases can't hold symlinks, so copy
+          # repo-add leaves .db/.files (and their .sig) as symlinks to the .tar.gz
+          # files; releases can't hold symlinks, so replace them with real copies
+          rm -f arch-pkgbuilds.db arch-pkgbuilds.db.sig arch-pkgbuilds.files arch-pkgbuilds.files.sig
           cp arch-pkgbuilds.db.tar.gz arch-pkgbuilds.db
           cp arch-pkgbuilds.db.tar.gz.sig arch-pkgbuilds.db.sig
           cp arch-pkgbuilds.files.tar.gz arch-pkgbuilds.files
