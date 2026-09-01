@@ -138,8 +138,13 @@ jobs:
             [ -e "repo/$name" ] || gh release delete-asset repo "$name" -y
           done
           # packages are version-stamped: skip any already up there (name and size match)
-          for f in repo/*.pkg.tar.zst*; do
+          for f in repo/*.pkg.tar.zst; do
             grep -qxF "$(basename "$f") $(stat -c%s "$f")" <<<"$assets" \
               || gh release upload repo "$f" --clobber
           done
-          gh release upload repo repo/arch-pkgbuilds.db* repo/arch-pkgbuilds.files* --clobber
+          # Signatures are re-made every run and are tiny, so always upload them.
+          # Skipping them on a name-and-size match never fires (a detached sig is
+          # always 119 bytes under the same name), which left the signature behind
+          # whenever a package was rebuilt at an unchanged pkgver.
+          gh release upload repo repo/*.pkg.tar.zst.sig \
+            repo/arch-pkgbuilds.db* repo/arch-pkgbuilds.files* --clobber

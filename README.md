@@ -21,8 +21,12 @@ One time per machine, import the signing key and trust it locally:
 ```sh
 curl -LO https://raw.githubusercontent.com/marcelvdh/arch-pkgbuilds/main/arch-pkgbuilds.pub
 sudo pacman-key --add arch-pkgbuilds.pub
-sudo pacman-key --lsign-key FINGERPRINT
+sudo pacman-key --lsign-key 6CBA620FB74D4F08AA3A998F09B2AA5FF665F97A
 ```
+
+Both steps are needed: `SigLevel = Required` implies `TrustedOnly`, so a key
+that is imported but not locally signed leaves pacman refusing the database
+with `unknown trust`.
 
 Then append to `/etc/pacman.conf`:
 
