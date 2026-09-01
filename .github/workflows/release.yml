@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: Package to release (leave blank to release whatever is not released yet)
+        description: Package to release ("all" for every package; blank for whatever is not released yet)
         type: string
         required: false
 
@@ -35,6 +35,8 @@ jobs:
         run: |
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             list="$(jq -nc --arg p "${GITHUB_REF_NAME%%/*}" '[$p]')"   # claude-code/v2.1.252 -> claude-code
+          elif [ "$pkg_input" = all ]; then
+            list="$(bash scripts/list-packages.sh)"
           elif [ -n "$pkg_input" ]; then
             list="$(jq -nc --arg p "$pkg_input" '[$p]')"
           else
