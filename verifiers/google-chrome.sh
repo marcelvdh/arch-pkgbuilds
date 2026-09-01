@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Cross-checks the PKGBUILD's .deb
-# checksums (both arches) against Google's apt metadata, signed by the key
-# pinned in keys/.
+# Cross-check google-chrome's PKGBUILD sums against Google's signed apt metadata.
 set -euo pipefail
 
 dir="$(dirname "$0")"

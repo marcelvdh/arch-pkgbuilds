@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Vendor an AUR package's files into packages/<name>/.
-# You own the copy afterwards — review the PKGBUILD before trusting it.
-# Usage: scripts/add-aur.sh <aur-package-name>
+# Vendor packages/<name>/ from the AUR.
 set -euo pipefail
 
 name="$1"

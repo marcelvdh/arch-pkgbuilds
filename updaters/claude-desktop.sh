@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Bumps PKGBUILD to the latest version, prints it.
+# Bump claude-desktop's PKGBUILD to the latest version, print it.
 set -euo pipefail
 
 dir="$(dirname "$0")"

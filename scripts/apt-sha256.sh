@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
-# Print the SHA256 a signed apt repository publishes for a .deb, or nothing if
-# the repository no longer carries that file — an apt index only lists the
-# current version, so a superseded one is absent rather than wrong. Real
-# failures (bad signature, unreachable repo) exit non-zero.
-# Usage: apt-sha256.sh <base-url> <suite> <arch> <keyfile> <deb-filename>
+# Print the SHA256 a signed apt repository publishes for a .deb, or nothing if it no longer carries it.
 set -euo pipefail
 
 base="$1"; suite="$2"; arch="$3"; keyfile="$4"; deb="$5"

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Print the packages with no release for their current pkgver, as a JSON array.
-# Run from the repository root; needs an authenticated gh.
 set -euo pipefail
 
 for dir in packages/*/; do

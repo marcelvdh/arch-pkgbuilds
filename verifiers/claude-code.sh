@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Cross-checks the PKGBUILD's binary
-# checksums (both arches) against Anthropic's release manifest. The manifest is
-# unsigned and served from the same host as the binary, so this catches a bad
-# download, not a compromised publisher.
+# Cross-check claude-code's PKGBUILD sums against Anthropic's release manifest.
 set -euo pipefail
 
 dir="$(dirname "$0")"

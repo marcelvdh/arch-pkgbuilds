@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Cross-checks the PKGBUILD's .deb
-# checksum against Anthropic's apt metadata, signed by the key pinned in keys/.
+# Cross-check claude-desktop's PKGBUILD sum against Anthropic's signed apt metadata.
 set -euo pipefail
 
 dir="$(dirname "$0")"

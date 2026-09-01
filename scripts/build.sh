@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Lint and build the package in the current directory.
 set -euo pipefail
 
 namcap PKGBUILD || true

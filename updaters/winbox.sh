@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Bumps PKGBUILD to the latest version, prints it.
-# The WinBox download page links WinBox_Linux.zip with the version in its path.
+# Bump winbox's PKGBUILD to the latest version, print it.
 set -euo pipefail
 
 ver="$(curl -fsSL -A 'Mozilla/5.0' https://mikrotik.com/download/winbox \

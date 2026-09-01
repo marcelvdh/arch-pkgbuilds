@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Run the package's verifier, if it has one. Verifiers are optional, so a
-# missing one is a warning rather than a failure — but never a silent skip.
-# Run with cwd = the package's folder. Usage: verify.sh
+# Run the package's verifier if it has one; a missing one warns, never fails silently.
 set -euo pipefail
 
 pkg="$(basename "$PWD")"

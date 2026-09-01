@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# Shared tail of the verifiers: assert that a checksum upstream publishes is
-# pinned in ./PKGBUILD. An empty checksum means upstream no longer carries this
-# version, which is not a failure — a lookup that actually failed exits
-# non-zero before reaching here.
-# Run with cwd = the package's folder. Usage: check-sum.sh <label> <sha256>
+# Shared tail of the verifiers: assert an upstream-published checksum is pinned in ./PKGBUILD.
+# An empty checksum is not a failure — upstream no longer carries this version; a lookup
+# that actually failed exits non-zero before reaching here.
 set -euo pipefail
 
 label="$1"; want="$2"

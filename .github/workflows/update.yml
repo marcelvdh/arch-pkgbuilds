@@ -59,8 +59,7 @@ jobs:
             echo "Already up to date."
             exit 0
           fi
-          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"   # the PR's Build run compiles it
-          # updpkgsums pins whatever upstream served; check that against what upstream publishes
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"   # the PR's Check run compiles it
           sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 

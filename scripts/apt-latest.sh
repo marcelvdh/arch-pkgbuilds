@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Print the latest version of a package in a signed apt repository.
-# Usage: apt-latest.sh <base-url> <suite> <arch> <keyfile> <pkg> [strip-release]
 set -euo pipefail
 
 base="$1"; suite="$2"; arch="$3"; keyfile="$4"; pkg="$5"; strip="${6:-}"

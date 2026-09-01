@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Print a Debian apt repository's Packages index, after verifying the InRelease
-# signature against a pinned key and the index against the signed InRelease.
-# Usage: apt-index.sh <base-url> <suite> <arch> <keyfile>
+# Print a signed apt repository's Packages index, verified against a pinned key.
 set -euo pipefail
 
 base="$1"; suite="$2"; arch="$3"; keyfile="$4"

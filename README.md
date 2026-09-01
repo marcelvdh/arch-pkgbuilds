@@ -50,23 +50,25 @@ makepkg -si
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `build.yml` | PR / push to `main` | builds the affected packages in an Arch container to prove they still compile; publishes nothing |
+| `check.yml` | PR / push to `main` | builds the affected packages in an Arch container to prove they still compile; publishes nothing |
 | `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
 | `release.yml` | push to `main` / tag `<name>/v*` / manual | publishes any package whose current `pkgver` has no release yet, and refreshes the pacman repo database |
 
-`build.yml` is the check and `release.yml` is the publisher: only `release.yml`
+`check.yml` is the check and `release.yml` is the publisher: only `release.yml`
 produces something installable. They never both build the same change — a
-PKGBUILD edit belongs to `release.yml`, everything else to `build.yml`.
+PKGBUILD edit belongs to `release.yml`, everything else to `check.yml`.
 
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in
-`updaters/<name>.sh`, run with the package folder as its working directory.
-`verifiers/<name>.sh` (same contract) cross-checks the PKGBUILD sums against the
-checksums upstream publishes; all three workflows run it, so nothing builds,
+`updaters/<name>.sh`. `verifiers/<name>.sh` cross-checks the PKGBUILD sums against
+the checksums upstream publishes; all three workflows run it, so nothing builds,
 releases or reaches the pacman repo on a sum nobody checked. Both share
 `scripts/apt-index.sh` for apt-hosted packages, which fetches the `Packages`
 index once and verifies its InRelease signature against the keys pinned in
 `keys/`.
+
+Every script in `updaters/` and `verifiers/` runs with the package folder as its
+working directory, and those in `scripts/` are shared helpers they call.
 
 Two levels of trust hide behind the word "verified", and it is worth being
 precise about which one a package gets:

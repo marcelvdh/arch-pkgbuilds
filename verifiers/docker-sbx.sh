@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Cross-checks the PKGBUILD's tarball
-# checksum against the subject digest in the provenance Docker attaches to the
-# release. Only the statement is read, not its signature, so this is a
-# same-origin cross-check — `gh attestation verify` would be the real thing.
+# Cross-check docker-sbx's PKGBUILD sum against the digest in Docker's provenance statement.
 set -euo pipefail
 
 ver="$(grep -oPm1 '^pkgver=\K.*' PKGBUILD)"

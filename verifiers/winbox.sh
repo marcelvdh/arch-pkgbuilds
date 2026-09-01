@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# Run with cwd = the package's folder. Cross-checks the PKGBUILD's zip checksum
-# against the .sha256 sidecar MikroTik publishes next to it. The sidecar is
-# unsigned and served from the same host as the zip, so this catches a bad
-# download, not a compromised publisher.
+# Cross-check winbox's PKGBUILD sum against MikroTik's .sha256 sidecar.
 set -euo pipefail
 
 ver="$(grep -oPm1 '^pkgver=\K.*' PKGBUILD)"
