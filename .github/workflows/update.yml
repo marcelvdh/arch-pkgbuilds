@@ -12,7 +12,7 @@ on:
 
 permissions:
   contents: read
-  issues: write        # the app token opens the PR; this is only for "Report failure"
+  issues: write        # only for "Report failure"; the app token opens the PR
 
 jobs:
   discover:
@@ -59,17 +59,16 @@ jobs:
             echo "Already up to date."
             exit 0
           fi
-          # The PR's own Build run compiles it; this only refreshes the checksums.
-          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"   # the PR's Build run compiles it
+          # updpkgsums pins whatever upstream served; check that against what upstream publishes
+          sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
-      # A PR opened by github-actions[bot] counts as a first-time contributor, so
-      # its checks sit unstarted until approved by hand. An app token is a distinct
-      # identity and has no such gate.
+      # PRs from github-actions[bot] need approving by hand before their checks run.
       - name: Mint app token
         id: token
         if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.UPDATER_APP_ID }}
           private-key: ${{ secrets.UPDATER_APP_PRIVATE_KEY }}
