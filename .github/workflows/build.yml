@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches: [main]
-    paths-ignore: ['packages/*/PKGBUILD']
+    paths-ignore: ['packages/*/PKGBUILD', '**.md']   # a PKGBUILD change is release.yml's job; it builds too
   workflow_dispatch:
 
 permissions:
@@ -60,10 +60,3 @@ jobs:
         env:
           pkg: ${{ matrix.package }}
         run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
-
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.package }}-pkg
-          path: ${{ github.workspace }}/packages/${{ matrix.package }}/*.pkg.tar.zst
-          if-no-files-found: error

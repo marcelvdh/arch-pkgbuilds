@@ -50,9 +50,13 @@ makepkg -si
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `build.yml` | PR / push | builds every package in an Arch container and uploads each as an artifact |
+| `build.yml` | PR / push to `main` | builds the affected packages in an Arch container to prove they still compile; publishes nothing |
 | `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
-| `release.yml` | merge to `main` touching a PKGBUILD / tag `<name>/v*` / manual | builds the package, attaches it to a GitHub Release, and refreshes the pacman repo database |
+| `release.yml` | push to `main` / tag `<name>/v*` / manual | publishes any package whose current `pkgver` has no release yet, and refreshes the pacman repo database |
+
+`build.yml` is the check and `release.yml` is the publisher: only `release.yml`
+produces something installable. They never both build the same change — a
+PKGBUILD edit belongs to `release.yml`, everything else to `build.yml`.
 
 Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
 files — nothing generated). Version-checking lives separately in
@@ -66,8 +70,13 @@ git tag google-chrome/v151.0.7922.169
 git push origin google-chrome/v151.0.7922.169
 ```
 
-or run `release.yml` from the Actions tab: enter a package name, or leave it
-blank to release every package at its current `pkgver`.
+or run `release.yml` from the Actions tab: leave the package blank to publish
+whatever has no release yet, or name one to republish it — which is also how you
+ship a `pkgrel`-only change, since the tag already exists.
+
+`release.yml` picks what to build by asking which `pkgver`s have no release
+(`scripts/unreleased.sh`) rather than by inspecting what a push changed, so a
+release that fails or never ran simply happens on the next push to `main`.
 
 ## Add a package
 
@@ -79,3 +88,8 @@ Review the PKGBUILD — you own the copy now. It builds and releases immediately
 the workflows auto-discover `packages/*/`, so there are no lists to edit. For
 nightly version-bump PRs, add an `updaters/<name>.sh` that bumps its PKGBUILD to
 the latest upstream version (optional; runs with the package folder as cwd).
+
+The nightly opens its PRs with a GitHub App token (`UPDATER_APP_ID` and
+`UPDATER_APP_PRIVATE_KEY` secrets). A PR opened with the default `GITHUB_TOKEN`
+is authored by `github-actions[bot]`, which counts as a first-time contributor,
+so its checks would sit unstarted until approved by hand.

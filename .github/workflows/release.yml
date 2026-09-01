@@ -6,44 +6,46 @@ on:
       - '*/v*'                     # e.g. google-chrome/v151.0.7922.169
     branches:
       - main
-    paths:
-      - 'packages/*/PKGBUILD'      # e.g. a merged autoupdate PR
   workflow_dispatch:
     inputs:
       package:
-        description: Package to release (leave blank to release all)
+        description: Package to release (leave blank to release whatever is not released yet)
         type: string
         required: false
 
 permissions:
   contents: write
 
+# GitHub sometimes delivers two push events for one merge. Without this, both runs
+# race to create the same release, one ends up untagged, and its uploads 404.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false        # a second merge must not cancel the first one's release
+
 jobs:
   discover:
     runs-on: ubuntu-latest
     outputs:
-      packages: ${{ steps.l.outputs.packages }}
+      packages: ${{ steps.list.outputs.packages }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      pkg_input: ${{ github.event.inputs.package }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - id: l
-        env:
-          pkg_input: ${{ github.event.inputs.package }}
+      - id: list
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            list="[\"${GITHUB_REF_NAME%%/*}\"]"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            list="$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' -- 'packages/*/PKGBUILD' | cut -d/ -f2 | sort -u | jq -Rsc 'split("\n")|map(select(length>0))')"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            list="$(jq -nc --arg p "${GITHUB_REF_NAME%%/*}" '[$p]')"   # claude-code/v2.1.252 -> claude-code
           elif [ -n "$pkg_input" ]; then
             list="$(jq -nc --arg p "$pkg_input" '[$p]')"
           else
-            list="$(bash scripts/list-packages.sh)"
+            list="$(bash scripts/unreleased.sh)"
           fi
           echo "packages=$list" >> "$GITHUB_OUTPUT"
 
   release:
     needs: discover
+    if: needs.discover.outputs.packages != '[]'
     strategy:
       fail-fast: false
       matrix:
@@ -62,13 +64,13 @@ jobs:
       - uses: ./.github/actions/setup-arch
 
       - name: Resolve tag
-        id: r
+        id: tag
         run: |
           test -f "packages/$pkg/PKGBUILD" || { echo "Unknown package: $pkg" >&2; exit 1; }
-          if [ "${{ github.ref_type }}" = "tag" ]; then
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
             tag="$GITHUB_REF_NAME"
           else
-            tag="$pkg/v$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
+            tag="$pkg/v$(grep -oPm1 '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "ver=${tag##*/v}" >> "$GITHUB_OUTPUT"
@@ -78,24 +80,23 @@ jobs:
 
       - name: Publish release
         env:
-          tag: ${{ steps.r.outputs.tag }}
-          ver: ${{ steps.r.outputs.ver }}
+          tag: ${{ steps.tag.outputs.tag }}
+          ver: ${{ steps.tag.outputs.ver }}
         run: |
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
-            gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
-          else
-            gh release create "$tag" --target "$GITHUB_SHA" \
-              --title "$tag" --notes "$pkg $ver" \
-              packages/$pkg/*.pkg.tar.zst
-          fi
+          # Create the tag first: when `gh release create` has to create it, the
+          # release can end up untagged and asset uploads to it then 404.
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" >/dev/null 2>&1 || true
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes "$pkg $ver" 2>/dev/null \
+            || gh release edit "$tag" --title "$tag" --notes "$pkg $ver"
+          gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
 
   # Regenerate the pacman repository: the rolling release "repo" carries every
   # package at its current pkgver plus the repo-add database, so users can point
   # pacman.conf at it (see README). Full sync each time — idempotent, self-healing.
   repo:
-    needs: release
-    if: ${{ !cancelled() }}     # sync what did release even if one package failed
+    needs: [discover, release]
+    if: ${{ !cancelled() && needs.discover.outputs.packages != '[]' }}   # nothing released, nothing to sync
     runs-on: ubuntu-latest
     container: archlinux:latest
     concurrency:
@@ -117,9 +118,9 @@ jobs:
           mkdir repo
           for path in packages/*/; do
             pkg="$(basename "$path")"
-            ver="$(grep -oP '^pkgver=\K.*' "$path/PKGBUILD")"
+            ver="$(grep -oPm1 '^pkgver=\K.*' "$path/PKGBUILD")"
             gh release download "$pkg/v$ver" --pattern '*.pkg.tar.zst' --dir repo \
-              || echo "::warning::$pkg/v$ver has no release; leaving it out of the repo db"
+              || { echo "::error::$pkg/v$ver has no release; refusing to publish a database missing it"; exit 1; }
           done
           cd repo
           for f in *.pkg.tar.zst; do
@@ -127,12 +128,10 @@ jobs:
           done
           repo-add --sign arch-pkgbuilds.db.tar.gz ./*.pkg.tar.zst
           # repo-add leaves .db/.files (and their .sig) as symlinks to the .tar.gz
-          # files; releases can't hold symlinks, so replace them with real copies
-          rm -f arch-pkgbuilds.db arch-pkgbuilds.db.sig arch-pkgbuilds.files arch-pkgbuilds.files.sig
-          cp arch-pkgbuilds.db.tar.gz arch-pkgbuilds.db
-          cp arch-pkgbuilds.db.tar.gz.sig arch-pkgbuilds.db.sig
-          cp arch-pkgbuilds.files.tar.gz arch-pkgbuilds.files
-          cp arch-pkgbuilds.files.tar.gz.sig arch-pkgbuilds.files.sig
+          # files; releases can't hold symlinks, so replace each with a real copy.
+          for link in arch-pkgbuilds.db arch-pkgbuilds.db.sig arch-pkgbuilds.files arch-pkgbuilds.files.sig; do
+            cp --remove-destination "$(readlink -f "$link")" "$link"
+          done
 
       - name: Publish to rolling release
         run: |
