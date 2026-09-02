@@ -1,8 +1,5 @@
 # Forked from the AUR google-chrome package: https://aur.archlinux.org/packages/google-chrome
 
-# Check for new Linux releases in: http://googlechromereleases.blogspot.com/search/label/Stable%20updates
-# or use: $ curl -sSf https://dl.google.com/linux/chrome/deb/dists/stable/main/binary-amd64/Packages | grep -A1 "Package: google-chrome-stable" | awk '/Version/{print $2}' | cut -d '-' -f1
-
 pkgname=google-chrome
 pkgver=152.0.7977.64
 pkgrel=1
@@ -34,7 +31,6 @@ install=$pkgname.install
 _channel=stable
 source=('eula_text.html'
         "google-chrome-$_channel.sh")
-# sha256, matching what Google's signed apt metadata publishes (see verifiers/google-chrome.sh)
 sha256sums=('e93c01576427cad9099f2cf0df0be70d0a2cc0a3a66c743318b2138aa7c4ed93'
             '04e973a4c359a87ef63871ec8726e08fabe9919c60f972d5ca6f56f80a2939ed')
 sha256sums_x86_64=('4eae0736a812d9bc851cd2937f7af00e47dbaf8305845eed452703ff009873c7')
@@ -46,27 +42,22 @@ source_aarch64=("https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrom
 package() {
 	bsdtar -xf data.tar.xz -C "$pkgdir/"
 
-	# Launcher
 	install -m755 google-chrome-$_channel.sh "$pkgdir"/usr/bin/google-chrome-$_channel
 
-	# Icons
 	for i in 16x16 24x24 32x32 48x48 64x64 128x128 256x256; do
 		install -Dm644 "$pkgdir"/opt/google/chrome/product_logo_${i/x*/}.png \
 			"$pkgdir"/usr/share/icons/hicolor/$i/apps/google-chrome.png
 	done
 
-	# License
 	install -Dm644 eula_text.html "$pkgdir"/usr/share/licenses/google-chrome/eula_text.html
 	install -Dm644 "$pkgdir"/opt/google/chrome/WidevineCdm/LICENSE \
 		"$pkgdir"/usr/share/licenses/google-chrome-$_channel/WidevineCdm-LICENSE.txt
 
-	# Fix the Chrome desktop entry
 	sed -i \
 		-e "/Exec=/i\StartupWMClass=Google-chrome" \
 		-e "s/x-scheme-handler\/ftp;\?//g" \
 		"$pkgdir"/usr/share/applications/google-chrome.desktop
 
-	# Remove the Debian Cron job, duplicate product logos and menu directory
 	rm -r \
 		"$pkgdir"/etc/cron.daily/ \
 		"$pkgdir"/opt/google/chrome/cron/ \

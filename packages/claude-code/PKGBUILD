@@ -8,7 +8,6 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/anthropics/claude-code"
 license=('LicenseRef-claude-code')
 depends=('bash')
-# Binary is a self-contained Bun executable with embedded JS/resources - stripping breaks it
 options=('!strip' '!debug')
 
 optdepends=(
@@ -21,12 +20,6 @@ optdepends=(
 	'socat: sandboxing'
 )
 
-# The AUR package pulls the legal doc live from code.claude.com with a SKIP checksum.
-# That does not survive this repo's nightly updater: updpkgsums rewrites SKIP into a
-# concrete hash for http sources, pinning a page Anthropic edits independently of
-# releases, so every later build breaks until the next version bump. Vendored instead,
-# the way google-chrome vendors eula_text.html. Refresh it with:
-#   curl -fsSL https://code.claude.com/docs/en/legal-and-compliance.md -o cc-legal.md && updpkgsums
 source=('cc-legal.md')
 source_x86_64=("claude-${pkgver}-x86_64::https://downloads.claude.ai/claude-code-releases/${pkgver}/linux-x64/claude")
 source_aarch64=("claude-${pkgver}-aarch64::https://downloads.claude.ai/claude-code-releases/${pkgver}/linux-arm64/claude")
@@ -38,10 +31,6 @@ sha256sums_aarch64=('22f7d48f17193952c3c2d0b8bf2f31db2cd08fd5fb09a374fa321496b71
 package() {
 	install -Dm755 "${srcdir}/claude-${pkgver}-${CARCH}" "${pkgdir}/opt/claude-code/bin/claude"
 
-	# Create wrapper script to disable upstream update paths, and to suppress the
-	# native-install health check. Claude Code expects the native installer layout
-	# (~/.local/bin/claude); since we install to /opt + /usr/bin it would otherwise
-	# warn on every startup: "claude command at ~/.local/bin/claude missing or broken".
 	install -dm755 "${pkgdir}/usr/bin"
 	cat > "${pkgdir}/usr/bin/claude" << 'EOF'
 #!/bin/sh
