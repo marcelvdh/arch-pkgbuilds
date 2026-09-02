@@ -1,7 +1,8 @@
 # arch-pkgbuilds
 
-A personal collection of Arch Linux `PKGBUILD`s I build and trust, compiled in
-CI as artifacts.
+A personal pacman repository. Every package here is built from its `PKGBUILD`
+in GitHub Actions, signed, and published as a GitHub release; a rolling `repo`
+release carries the pacman database.
 
 ## Packages
 
@@ -14,9 +15,9 @@ CI as artifacts.
 | `docker-sbx` | forked from AUR |
 | `winbox` | forked from AUR |
 
-## Install via pacman
+## Install
 
-One time per machine, import the signing key and trust it locally:
+Import the signing key and trust it locally, once per machine:
 
 ```sh
 curl -LO https://raw.githubusercontent.com/marcelvdh/arch-pkgbuilds/main/arch-pkgbuilds.pub
@@ -24,11 +25,11 @@ sudo pacman-key --add arch-pkgbuilds.pub
 sudo pacman-key --lsign-key 6CBA620FB74D4F08AA3A998F09B2AA5FF665F97A
 ```
 
-Both steps are needed: `SigLevel = Required` implies `TrustedOnly`, so a key
-that is imported but not locally signed leaves pacman refusing the database
-with `unknown trust`.
+Both steps matter: `SigLevel = Required` implies `TrustedOnly`, and a key that
+is imported but not locally signed makes pacman reject the database with
+`unknown trust`.
 
-Then append to `/etc/pacman.conf`:
+Append to `/etc/pacman.conf`:
 
 ```ini
 [arch-pkgbuilds]
@@ -36,79 +37,99 @@ SigLevel = Required
 Server = https://github.com/marcelvdh/arch-pkgbuilds/releases/download/repo
 ```
 
-Then `pacman -Syu` to sync and `pacman -S <package>` to install; installed
-packages upgrade with the rest of the system from then on. The `repo` rolling
-release carries the repo database and every package at its current `pkgver`,
-refreshed by `release.yml` after each release. Packages and the database are
-signed in CI with the key above (`arch-pkgbuilds.pub`, private half held only
-as an Actions secret), so pacman rejects anything not signed by it.
+Then `pacman -Syu` and `pacman -S <package>`. From there packages upgrade with
+the rest of the system.
 
-## Build one locally
+## Layout
 
-```sh
-cd packages/<name>
-makepkg -si
+```
+packages/<name>/     PKGBUILD plus its vendored source files; nothing generated
+updaters/<name>.sh   bumps the PKGBUILD to the latest upstream version (optional)
+verifiers/<name>.sh  checks the pinned sha256 against what upstream publishes (optional)
+scripts/             shared helpers the above call
+keys/                upstream apt signing keys, pinned; see keys/README.md
 ```
 
-## CI
+Updaters and verifiers run with the package folder as their working directory.
+The workflows discover `packages/*/` on their own, so adding a package is a
+matter of adding a folder.
 
-| Workflow | Trigger | What it does |
+## Workflows
+
+| Workflow | Runs on | Does |
 |---|---|---|
-| `check.yml` | PR / push to `main` | builds the affected packages in an Arch container to prove they still compile; publishes nothing |
-| `update.yml` | nightly / manual | checks every package for a newer upstream version and opens a version-bump PR per package |
-| `release.yml` | push to `main` / tag `<name>/v*` / manual | publishes any package whose current `pkgver` has no release yet, and refreshes the pacman repo database |
+| `update.yml` | nightly at 23:00 UTC, or by hand | opens a version-bump PR per package that has a newer upstream release |
+| `check.yml` | pull requests, pushes to `main` | builds the affected packages to prove they still compile; publishes nothing |
+| `release.yml` | pushes to `main`, tags `<name>/v*`, or by hand | publishes packages and refreshes the pacman repo |
 
-`check.yml` is the check and `release.yml` is the publisher: only `release.yml`
-produces something installable. They never both build the same change — a
-PKGBUILD edit belongs to `release.yml`, everything else to `check.yml`.
+All three run in an `archlinux:latest` container as an unprivileged `builder`
+user, and all three run the package's verifier before building, so nothing is
+compiled, released or served on a checksum nobody cross-checked.
 
-Each `packages/<name>/` folder is self-contained (PKGBUILD plus its source
-files — nothing generated). Version-checking lives separately in
-`updaters/<name>.sh`. `verifiers/<name>.sh` cross-checks the PKGBUILD sums against
-the checksums upstream publishes; all three workflows run it, so nothing builds,
-releases or reaches the pacman repo on a sum nobody checked. Both share
-`scripts/apt-index.sh` for apt-hosted packages, which fetches the `Packages`
-index once and verifies its InRelease signature against the keys pinned in
-`keys/`.
+### Nightly update
 
-Every script in `updaters/` and `verifiers/` runs with the package folder as its
-working directory, and those in `scripts/` are shared helpers they call.
+For each package with an updater: run it, and stop if `pkgver` did not move.
+Otherwise `updpkgsums`, run the verifier, and open a PR from branch
+`autoupdate/<name>-<version>` containing the single changed PKGBUILD. The
+commit is made through the GitHub API with a GitHub App token
+(`UPDATER_APP_ID`, `UPDATER_APP_PRIVATE_KEY`), which gets it signed and lets
+the PR's checks start without manual approval — a PR from
+`github-actions[bot]` would sit waiting as a first-time contributor. A failed
+run opens an issue titled `Update failed: <name> on <date>`, once.
 
-Two levels of trust hide behind the word "verified", and it is worth being
-precise about which one a package gets:
+A closed PR does not block a new one: only an open PR on the same branch does.
+Merged PRs need nothing either, since `main` then carries the version.
 
-| Package | Cross-checked against | Signed? |
-|---|---|---|
-| `google-chrome`, `claude-desktop` | apt `InRelease` → `Packages` → `.deb` | yes, against a pinned key |
-| `claude-code`, `docker-desktop`, `docker-sbx`, `winbox` | a checksum file next to the artifact | no |
+### Check
 
-The unsigned ones catch a corrupt or truncated download, and they catch
-`updpkgsums` hashing something other than what upstream meant to ship. They do
-not defend against a compromised CDN or publisher account: whoever can serve the
-bad artifact can serve a matching hash. Only the signed apt path does that.
+On a pull request, only the packages whose folders changed are built; if
+anything outside `packages/` changed, everything is. Pushes to `main` that
+touch only a PKGBUILD or Markdown are skipped, because `release.yml` builds
+those.
 
-Keys in `keys/` are vendored byte-for-byte from the URL each vendor's own
-documentation points at — never from a key server. `keys/README.md` records the
-fingerprint, download URL and documentation page for each.
+### Release
 
-An apt index only lists the current version, so a verifier that finds no
-checksum for the pinned version reports it and passes — that is a superseded
-release, not a mismatch. A signature or network failure still fails hard.
+`release.yml` does not look at what a push changed. It asks which packages have
+no release for their current `pkgver` (`scripts/unreleased.sh`) and publishes
+those, so a release that failed or never ran happens on the next push to
+`main`. Per package: verify, build, create tag `<name>/v<pkgver>`, create the
+release, upload the `.pkg.tar.zst`.
 
-## Release a package
+The `repo` job then rebuilds the pacman repository from scratch: download every
+package's current release, sign each with the repository key (`SIGNING_KEY`),
+`repo-add --sign`, and upload the lot to the rolling `repo` release. It refuses
+to publish a database that references a package with no release.
+
+To release by hand, push a tag or run the workflow from the Actions tab: blank
+publishes whatever has no release yet, `all` republishes everything, a name
+republishes that one — which is also how a `pkgrel`-only change ships, since
+the tag already exists.
 
 ```sh
 git tag google-chrome/v151.0.7922.169
 git push origin google-chrome/v151.0.7922.169
 ```
 
-or run `release.yml` from the Actions tab: leave the package blank to publish
-whatever has no release yet, or name one to republish it — which is also how you
-ship a `pkgrel`-only change, since the tag already exists.
+## Verification
 
-`release.yml` picks what to build by asking which `pkgver`s have no release
-(`scripts/unreleased.sh`) rather than by inspecting what a push changed, so a
-release that fails or never ran simply happens on the next push to `main`.
+"Verified" means one of two things here:
+
+| Package | Cross-checked against | Signed? |
+|---|---|---|
+| `google-chrome`, `claude-desktop` | apt `InRelease` → `Packages` → `.deb` | yes, against a key pinned in `keys/` |
+| `claude-code`, `docker-desktop`, `docker-sbx`, `winbox` | a checksum file next to the artifact | no |
+
+The unsigned checks catch a corrupt download and `updpkgsums` hashing
+something other than what upstream shipped. They do not defend against a
+compromised CDN or publisher: whoever can serve a bad artifact can serve a
+matching hash. Only the signed apt path does that.
+
+Keys in `keys/` are vendored byte-for-byte from the URL each vendor's own
+documentation points at, never from a key server.
+
+An apt index only lists the current version. A verifier that finds no checksum
+for the pinned version reports a superseded release and passes; a signature or
+network failure fails hard.
 
 ## Add a package
 
@@ -116,15 +137,14 @@ release that fails or never ran simply happens on the next push to `main`.
 scripts/add-aur.sh <name>     # vendors packages/<name>/ from the AUR
 ```
 
-Review the PKGBUILD — you own the copy now. It builds and releases immediately;
-the workflows auto-discover `packages/*/`, so there are no lists to edit. For
-nightly version-bump PRs, add an `updaters/<name>.sh` that bumps its PKGBUILD to
-the latest upstream version (optional; runs with the package folder as cwd), and
-a `verifiers/<name>.sh` if upstream publishes checksums worth cross-checking.
-Both are optional, but a package with no verifier logs a CI warning every time
-it builds.
+Review the PKGBUILD; it is yours now. It builds and releases on the next push
+to `main`. Add `updaters/<name>.sh` for nightly bump PRs and
+`verifiers/<name>.sh` if upstream publishes checksums; a package without a
+verifier logs a warning on every build.
 
-The nightly opens its PRs with a GitHub App token (`UPDATER_APP_ID` and
-`UPDATER_APP_PRIVATE_KEY` secrets). A PR opened with the default `GITHUB_TOKEN`
-is authored by `github-actions[bot]`, which counts as a first-time contributor,
-so its checks would sit unstarted until approved by hand.
+## Build locally
+
+```sh
+cd packages/<name>
+makepkg -si
+```
