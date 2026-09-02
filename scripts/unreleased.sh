@@ -6,4 +6,4 @@ for dir in packages/*/; do
   pkg="$(basename "$dir")"
   ver="$(grep -oPm1 '^pkgver=\K.*' "$dir/PKGBUILD")"
   gh release view "$pkg/v$ver" >/dev/null 2>&1 || echo "$pkg"
-done | jq -Rsc 'split("\n")|map(select(length>0))'
+done | jq -Rnc '[inputs]'
