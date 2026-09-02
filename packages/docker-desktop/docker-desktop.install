@@ -11,10 +11,8 @@ post_install_upgrade() {
         echo 'kubernetes.docker.internal already in /etc/hosts'
     fi
 
-    [ -f /usr/local/bin/docker ] || ln -s /usr/bin/docker /usr/local/bin/docker
-    [ -f /usr/local/bin/compose-bridge ] || ln -sf /opt/docker-desktop/bin/compose-bridge /usr/local/bin/compose-bridge
-
-    update-desktop-database
+    [ -e /usr/local/bin/docker ] || ln -sf /usr/bin/docker /usr/local/bin/docker
+    [ -e /usr/local/bin/compose-bridge ] || ln -sf /opt/docker-desktop/bin/compose-bridge /usr/local/bin/compose-bridge
 }
 
 post_install() {
@@ -66,6 +64,10 @@ pre_remove() {
 }
 
 post_remove() {
+    sed -i '/^# Added by Docker Desktop$/,/^# End of section$/d' /etc/hosts
+    [ "$(readlink /usr/local/bin/docker)" = /usr/bin/docker ] && rm /usr/local/bin/docker
+    [ "$(readlink /usr/local/bin/compose-bridge)" = /opt/docker-desktop/bin/compose-bridge ] && rm /usr/local/bin/compose-bridge
+
     if [ -d /run/systemd/system ]; then
         echo "Reloading systemd daemon"
         loginctl --no-legend list-users | awk '{print $1}' | while read -r uid; do

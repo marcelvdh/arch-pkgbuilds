@@ -19,28 +19,10 @@ sha256sums=('888694f4412e253e2dbf2ca4612a43e7d833407282296c14d980735151b639de'
             '4b2c131b5cf10b4fc7e9ab5decba5dc4978a5d1f1b0609005845224724b550f4')
 
 package() {
-    install -d "${pkgdir}/usr/bin"
-    install -d "${pkgdir}/usr/share/applications"
-    install -d "${pkgdir}/usr/lib/systemd/user"
-    install -d "${pkgdir}/usr/lib/docker/cli-plugins"
-    install -m644 "${srcdir}/usr/lib/systemd/user/docker-desktop.service" "${pkgdir}/usr/lib/systemd/user/docker-desktop.service"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-agent" "${pkgdir}/usr/lib/docker/cli-plugins/docker-agent"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-ai" "${pkgdir}/usr/lib/docker/cli-plugins/docker-ai"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-buildx" "${pkgdir}/usr/lib/docker/cli-plugins/docker-buildx"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-compose" "${pkgdir}/usr/lib/docker/cli-plugins/docker-compose"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-debug" "${pkgdir}/usr/lib/docker/cli-plugins/docker-debug"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-desktop" "${pkgdir}/usr/lib/docker/cli-plugins/docker-desktop"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-dhi" "${pkgdir}/usr/lib/docker/cli-plugins/docker-dhi"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-extension" "${pkgdir}/usr/lib/docker/cli-plugins/docker-extension"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-init" "${pkgdir}/usr/lib/docker/cli-plugins/docker-init"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-mcp" "${pkgdir}/usr/lib/docker/cli-plugins/docker-mcp"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-offload" "${pkgdir}/usr/lib/docker/cli-plugins/docker-offload"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-pass" "${pkgdir}/usr/lib/docker/cli-plugins/docker-pass"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-sandbox" "${pkgdir}/usr/lib/docker/cli-plugins/docker-sandbox"
-    install -m755 "${srcdir}/usr/lib/docker/cli-plugins/docker-scout" "${pkgdir}/usr/lib/docker/cli-plugins/docker-scout"
-    install -m755 "${srcdir}/usr/bin/docker-credential-desktop" "${pkgdir}/usr/bin/docker-credential-desktop"
     cp -r "${srcdir}/opt" "${pkgdir}"
-    cp "${srcdir}/usr/share/applications/"* "${pkgdir}/usr/share/applications/"
-
+    install -Dm755 "${srcdir}"/usr/bin/* -t "${pkgdir}/usr/bin"
+    install -Dm755 "${srcdir}"/usr/lib/docker/cli-plugins/* -t "${pkgdir}/usr/lib/docker/cli-plugins"
+    install -Dm644 "${srcdir}"/usr/lib/systemd/user/* -t "${pkgdir}/usr/lib/systemd/user"
+    install -Dm644 "${srcdir}"/usr/share/applications/* -t "${pkgdir}/usr/share/applications"
     install -Dm644 "${srcdir}/docker-agreement.txt" -t "${pkgdir}/usr/share/licenses/${pkgname}"
 }
