@@ -3,7 +3,7 @@
 pkgname=docker-desktop
 pkgver=4.89.0
 _revision=238018
-pkgrel=1
+pkgrel=2
 pkgdesc="Docker Desktop is an easy-to-install application that enables you to locally build and share containerized applications and microservices."
 arch=('x86_64')
 url="https://www.docker.com/products/docker-desktop/"

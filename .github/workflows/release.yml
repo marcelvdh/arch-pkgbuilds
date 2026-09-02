@@ -87,7 +87,10 @@ jobs:
             -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" >/dev/null 2>&1 || true
           gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes "$notes" 2>/dev/null \
             || gh release edit "$tag" --title "$tag" --notes "$notes"
-          gh release upload "$tag" packages/$pkg/*.pkg.tar.zst --clobber
+          for asset in $(gh release view "$tag" --json assets --jq '.assets[].name'); do
+            gh release delete-asset "$tag" "$asset" -y   # a pkgrel bump must not leave the old build behind
+          done
+          gh release upload "$tag" packages/$pkg/*.pkg.tar.zst
 
   # The "repo" release is what pacman.conf points at; rebuilt from scratch each time.
   repo:
