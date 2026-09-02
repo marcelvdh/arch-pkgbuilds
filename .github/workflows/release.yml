@@ -67,10 +67,12 @@ jobs:
       - uses: ./.github/actions/setup-arch
 
       - name: Verify upstream checksums
-        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
+        working-directory: packages/${{ matrix.package }}
+        run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
 
       - name: Build
-        run: sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/build.sh'"
+        working-directory: packages/${{ matrix.package }}
+        run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/build.sh"
 
       - name: Publish release
         run: |
@@ -131,22 +133,12 @@ jobs:
 
       - name: Publish to rolling release
         run: |
-          assets="$(gh release view repo --json assets --jq '.assets[] | "\(.name) \(.size)"' 2>/dev/null)" \
+          assets="$(gh release view repo --json assets --jq '.assets[].name' 2>/dev/null)" \
             || gh release create repo --latest=false \
                  --title "Pacman repository" \
                  --notes "Rolling release backing the pacman repository — see the README."
-          # drop assets this sync no longer carries
-          for name in $(cut -d' ' -f1 <<<"$assets"); do
+          for name in $assets; do   # drop assets this sync no longer carries
             [ -e "repo/$name" ] || gh release delete-asset repo "$name" -y
           done
-          # packages are version-stamped: skip any already up there (name and size match)
-          for f in repo/*.pkg.tar.zst; do
-            grep -qxF "$(basename "$f") $(stat -c%s "$f")" <<<"$assets" \
-              || gh release upload repo "$f" --clobber
-          done
-          # Signatures are re-made every run and are tiny, so always upload them.
-          # Skipping them on a name-and-size match never fires (a detached sig is
-          # always 119 bytes under the same name), which left the signature behind
-          # whenever a package was rebuilt at an unchanged pkgver.
-          gh release upload repo repo/*.pkg.tar.zst.sig \
-            repo/arch-pkgbuilds.db* repo/arch-pkgbuilds.files* --clobber
+          gh release upload repo repo/*.pkg.tar.zst --clobber   # packages before the database that lists them
+          gh release upload repo repo/*.pkg.tar.zst.sig repo/arch-pkgbuilds.* --clobber

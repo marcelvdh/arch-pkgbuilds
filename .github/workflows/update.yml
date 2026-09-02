@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: '0 23 * * *'                # 23:00 UTC (23:00 GMT / 00:00 BST in London)
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: Check for a new version but do not open a PR
-        type: boolean
-        default: true
 
 permissions:
   contents: read
@@ -47,33 +42,28 @@ jobs:
 
       - name: Bump PKGBUILD
         id: up
+        working-directory: packages/${{ matrix.package }}
         run: |
-          if [ ! -f "updaters/$pkg.sh" ]; then
-            echo "No updater; nothing to check."
-            exit 0
-          fi
-          old="$(grep -oP '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
-          new="$(sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/updaters/$pkg.sh'")"
+          [ -f "$GITHUB_WORKSPACE/updaters/$pkg.sh" ] || { echo "No updater; nothing to check."; exit 0; }
+          old="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+          new="$(sudo -H -u builder bash "$GITHUB_WORKSPACE/updaters/$pkg.sh")"
           echo "$pkg: $old -> $new"
-          if git diff --quiet -- "packages/$pkg/PKGBUILD"; then
-            echo "Already up to date."
-            exit 0
-          fi
-          sudo -H -u builder bash -c "cd 'packages/$pkg' && updpkgsums"   # the PR's Check run compiles it
-          sudo -H -u builder bash -c "cd 'packages/$pkg' && bash '$GITHUB_WORKSPACE/scripts/verify.sh'"
+          git diff --quiet PKGBUILD && { echo "Already up to date."; exit 0; }
+          sudo -H -u builder updpkgsums                                  # the PR's Check run compiles it
+          sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
       # PRs from github-actions[bot] need approving by hand before their checks run.
       - name: Mint app token
         id: token
-        if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
+        if: steps.up.outputs.new != ''
         uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.UPDATER_APP_ID }}
           private-key: ${{ secrets.UPDATER_APP_PRIVATE_KEY }}
 
       - name: Open pull request
-        if: steps.up.outputs.new != '' && github.event.inputs.dry_run != 'true'
+        if: steps.up.outputs.new != ''
         env:
           new: ${{ steps.up.outputs.new }}
           GH_TOKEN: ${{ steps.token.outputs.token }}
@@ -86,18 +76,10 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/heads/$branch" -f sha="$GITHUB_SHA" \
             || gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" -f sha="$GITHUB_SHA" -F force=true
           # Commit through the API instead of git push so GitHub signs it
-          query='mutation($repo:String!,$branch:String!,$headline:String!,$oid:GitObjectID!,$path:String!,$contents:Base64String!){
-            createCommitOnBranch(input:{
-              branch:{repositoryNameWithOwner:$repo,branchName:$branch},
-              message:{headline:$headline},
-              expectedHeadOid:$oid,
-              fileChanges:{additions:[{path:$path,contents:$contents}]}
-            }){commit{oid}}}'
-          gh api graphql -f query="$query" \
-            -f repo="$GITHUB_REPOSITORY" -f branch="$branch" \
-            -f headline="Update $pkg to $new" -f oid="$GITHUB_SHA" \
-            -f path="packages/$pkg/PKGBUILD" \
-            -f contents="$(base64 -w0 "packages/$pkg/PKGBUILD")"
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/packages/$pkg/PKGBUILD" \
+            -f branch="$branch" -f message="Update $pkg to $new" \
+            -f sha="$(git rev-parse "HEAD:packages/$pkg/PKGBUILD")" \
+            -f content="$(base64 -w0 "packages/$pkg/PKGBUILD")"
           gh pr create --base main --head "$branch" --title "Update $pkg to $new" --body "Update $pkg to $new."
 
       - name: Report failure
