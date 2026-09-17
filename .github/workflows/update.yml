@@ -44,12 +44,13 @@ jobs:
         id: up
         working-directory: packages/${{ matrix.package }}
         run: |
+          source "$GITHUB_WORKSPACE/scripts/lib.sh"
           [ -f "$GITHUB_WORKSPACE/updaters/$pkg.sh" ] || { echo "No updater; nothing to check."; exit 0; }
-          old="$(grep -oP '^pkgver=\K.*' PKGBUILD)"
+          old="$(pkgbuild pkgver)"
           new="$(sudo -H -u builder bash "$GITHUB_WORKSPACE/updaters/$pkg.sh")"
           echo "$pkg: $old -> $new"
           git diff --quiet PKGBUILD && { echo "Already up to date."; exit 0; }
-          sudo -H -u builder updpkgsums                                  # the PR's Check run compiles it
+          sudo -H -u builder updpkgsums
           sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 

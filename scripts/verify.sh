@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Run the package's verifier if it has one; a missing one warns, never fails silently.
+# Run the current package's verifier, if it has one.
 set -euo pipefail
 
 pkg="$(basename "$PWD")"
-verifier="$(dirname "$0")/../verifiers/$pkg.sh"
+verifier="${BASH_SOURCE[0]%/*}/../verifiers/$pkg.sh"
+
 [ -f "$verifier" ] || { echo "::warning::no verifier for $pkg"; exit 0; }
 exec bash "$verifier"

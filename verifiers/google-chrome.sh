@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Cross-check google-chrome's PKGBUILD sums against Google's signed apt metadata.
+# Check google-chrome's pinned sha256 against Google's signed apt metadata.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/../scripts/lib.sh"
 
-dir="$(dirname "$0")"
-ver="$(grep -oPm1 '^pkgver=\K.*' PKGBUILD)"
+version="$(pkgbuild pkgver)"
+
 for arch in amd64 arm64; do
-  want="$(bash "$dir/../scripts/apt-sha256.sh" \
-    https://dl.google.com/linux/chrome/deb stable "$arch" \
-    "$dir/../keys/google-linux.asc" \
-    "google-chrome-stable_${ver}-1_${arch}.deb")"
-  bash "$dir/../scripts/check-sum.sh" "google-chrome $ver ($arch)" "$want"
+  want="$(apt_sha256 https://dl.google.com/linux/chrome/deb stable "$arch" google-linux \
+    "google-chrome-stable_${version}-1_${arch}.deb")"
+  check_sum "google-chrome $version ($arch)" "$want"
 done

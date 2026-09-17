@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Cross-check docker-sbx's PKGBUILD sum against the digest in Docker's provenance statement.
+# Check docker-sbx's pinned sha256 against Docker's provenance statement.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/../scripts/lib.sh"
 
-ver="$(grep -oPm1 '^pkgver=\K.*' PKGBUILD)"
-want="$(curl -fsSL "https://github.com/docker/sbx-releases/releases/download/v$ver/DockerSandboxes-linux-amd64.provenance.json" \
+version="$(pkgbuild pkgver)"
+want="$(curl -fsSL "https://github.com/docker/sbx-releases/releases/download/v$version/DockerSandboxes-linux-amd64.provenance.json" \
   | jq -r '.subject[0].digest.sha256')"
-exec bash "$(dirname "$0")/../scripts/check-sum.sh" "docker-sbx $ver" "$want"
+
+check_sum "docker-sbx $version" "$want"

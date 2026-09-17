@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Vendor packages/<name>/ from the AUR.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/lib.sh"
 
 name="$1"
 dst="packages/$name"
-[ -e "$dst" ] && { echo "$dst already exists" >&2; exit 1; }
+[ -e "$dst" ] && die "$dst already exists"
 
 git clone --depth 1 "https://aur.archlinux.org/$name.git" "$dst"
 rm -rf "$dst/.git" "$dst/.SRCINFO"

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Bump claude-desktop's PKGBUILD to the latest version, print it.
+# Bump claude-desktop to the latest upstream version.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/../scripts/lib.sh"
 
-dir="$(dirname "$0")"
-ver="$(bash "$dir/../scripts/apt-latest.sh" \
-  https://downloads.claude.ai/claude-desktop/apt/stable stable amd64 \
-  "$dir/../keys/anthropic-apt.asc" claude-desktop)"
-exec bash "$dir/../scripts/set-pkgver.sh" "$ver"
+version="$(apt_latest https://downloads.claude.ai/claude-desktop/apt/stable stable amd64 anthropic-apt claude-desktop)"
+
+set_pkgver "$version"

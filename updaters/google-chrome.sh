@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Bump google-chrome's PKGBUILD to the latest version, print it.
+# Bump google-chrome to the latest upstream version.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/../scripts/lib.sh"
 
-dir="$(dirname "$0")"
-ver="$(bash "$dir/../scripts/apt-latest.sh" \
-  https://dl.google.com/linux/chrome/deb stable amd64 \
-  "$dir/../keys/google-linux.asc" google-chrome-stable)"
-exec bash "$dir/../scripts/set-pkgver.sh" "$ver"
+version="$(apt_latest https://dl.google.com/linux/chrome/deb stable amd64 google-linux google-chrome-stable)"
+
+set_pkgver "$version"

@@ -46,11 +46,15 @@ the rest of the system.
 packages/<name>/     PKGBUILD plus its vendored source files; nothing generated
 updaters/<name>.sh   bumps the PKGBUILD to the latest upstream version (optional)
 verifiers/<name>.sh  checks the pinned sha256 against what upstream publishes (optional)
-scripts/             shared helpers the above call
+scripts/lib.sh       shared helpers; every updater and verifier sources it
+scripts/             the entry points the workflows call
 keys/                upstream apt signing keys, pinned; see keys/README.md
 ```
 
-Updaters and verifiers run with the package folder as their working directory.
+Updaters and verifiers run with the package folder as their working directory
+and source `scripts/lib.sh`, which gives them `pkgbuild`, `set_pkgver`,
+`check_sum` and the signed-apt helpers.
+
 The workflows discover `packages/*/` on their own, so adding a package is a
 matter of adding a folder.
 
@@ -99,6 +103,14 @@ The `repo` job then rebuilds the pacman repository from scratch: download every
 package's current release, sign each with the repository key (`SIGNING_KEY`),
 `repo-add --sign`, and upload the lot to the rolling `repo` release. It refuses
 to publish a database that references a package with no release.
+
+Assets go up through `scripts/gh-upload.sh`. `gh` has no HTTP timeout, so a
+connection to `uploads.github.com` that goes quiet mid-transfer would hang the
+job until the 6h limit; each file gets a budget sized to it instead, and a
+stalled attempt is retried. Retries are per file, not per batch, because `gh`
+fails a whole argument list when any one asset errors and the endpoint returns
+sporadic `HTTP 500`s. `GH_UPLOAD_ATTEMPTS`, `GH_UPLOAD_JOBS` and
+`GH_UPLOAD_TIMEOUT` override the defaults.
 
 To release by hand, push a tag or run the workflow from the Actions tab: blank
 publishes whatever has no release yet, `all` republishes everything, a name

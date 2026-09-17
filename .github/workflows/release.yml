@@ -16,10 +16,10 @@ on:
 permissions:
   contents: read
 
-# GitHub can fire two push events for one merge; concurrent runs race and 404.
+# Two push events can fire for one merge; a second must not cancel the first's release.
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: false        # a second merge must not cancel the first one's release
+  cancel-in-progress: false
 
 jobs:
   discover:
@@ -35,7 +35,7 @@ jobs:
       - id: list
         run: |
           if [ "$GITHUB_REF_TYPE" = tag ]; then
-            list="$(jq -nc --arg p "${GITHUB_REF_NAME%%/*}" '[$p]')"   # claude-code/v2.1.252 -> claude-code
+            list="$(jq -nc --arg p "${GITHUB_REF_NAME%%/*}" '[$p]')"
           elif [ "$pkg_input" = all ]; then
             list="$(bash scripts/list-packages.sh)"
           elif [ -n "$pkg_input" ]; then
@@ -49,7 +49,7 @@ jobs:
     needs: discover
     if: needs.discover.outputs.packages != '[]'
     permissions:
-      contents: write        # creates the tag ref and the release
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -82,10 +82,11 @@ jobs:
       - name: Publish release
         timeout-minutes: 45
         run: |
+          source scripts/lib.sh
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             tag="$GITHUB_REF_NAME"
           else
-            tag="$pkg/v$(grep -oPm1 '^pkgver=\K.*' "packages/$pkg/PKGBUILD")"
+            tag="$pkg/v$(pkgbuild pkgver "packages/$pkg/PKGBUILD")"
           fi
           notes="$pkg ${tag##*/v}"
           # Make the tag ourselves; letting `gh release create` do it can leave it untagged.
@@ -97,7 +98,6 @@ jobs:
           # the upload stalls, and the repo job then refuses to build a database.
           bash scripts/gh-upload.sh "$tag" packages/$pkg/*.pkg.tar.zst
           for asset in $(gh release view "$tag" --json assets --jq '.assets[].name'); do
-            # anything we did not just build is a stale pkgrel; drop it
             [ -e "packages/$pkg/$asset" ] || gh release delete-asset "$tag" "$asset" -y
           done
 
@@ -105,7 +105,7 @@ jobs:
   repo:
     needs: [discover, release]
     permissions:
-      contents: write        # uploads the packages and database
+      contents: write
     # A manual dispatch always resyncs, so the database can be rebuilt from the
     # existing releases without rebuilding a package.
     if: ${{ !cancelled() && (needs.discover.outputs.packages != '[]' || github.event_name == 'workflow_dispatch') }}
@@ -130,11 +130,12 @@ jobs:
         env:
           signing_key: ${{ secrets.SIGNING_KEY }}
         run: |
+          source scripts/lib.sh
           gpg --batch --import <<<"$signing_key"
           mkdir repo
           for path in packages/*/; do
             pkg="$(basename "$path")"
-            ver="$(grep -oPm1 '^pkgver=\K.*' "$path/PKGBUILD")"
+            ver="$(pkgbuild pkgver "$path/PKGBUILD")"
             gh release download "$pkg/v$ver" --pattern '*.pkg.tar.zst' --dir repo \
               || { echo "::error::$pkg/v$ver has no release; refusing to publish a database missing it"; exit 1; }
           done
@@ -156,17 +157,14 @@ jobs:
             || gh release create repo --latest=false \
                  --title "Pacman repository" \
                  --notes "Rolling release backing the pacman repository — see the README."
-          # `gh release view --json` drops asset digests; the REST payload carries them.
           published="$(gh api "repos/$GH_REPO/releases/tags/repo" --jq '.assets[] | "\(.name) \(.digest)"')"
-          # Re-uploading every package on every sync is hundreds of megabytes through
-          # the endpoint that stalls. Send only what the release does not already hold,
-          # matched on content so a rebuilt package is never taken for the published one.
+          # Upload only what the release does not already hold, matched on content.
           stale=()
           for f in repo/*.pkg.tar.zst; do
             grep -qxF "$(basename "$f") sha256:$(sha256sum "$f" | cut -d' ' -f1)" <<<"$published" || stale+=("$f")
           done
-          bash scripts/gh-upload.sh repo "${stale[@]}"                        # packages first...
-          bash scripts/gh-upload.sh repo repo/*.pkg.tar.zst.sig repo/arch-pkgbuilds.*   # ...then the database listing them
+          bash scripts/gh-upload.sh repo "${stale[@]}"
+          bash scripts/gh-upload.sh repo repo/*.pkg.tar.zst.sig repo/arch-pkgbuilds.*
           for name in $(gh release view repo --json assets --jq '.assets[].name'); do
-            [ -e "repo/$name" ] || gh release delete-asset repo "$name" -y   # drop assets this sync no longer carries
+            [ -e "repo/$name" ] || gh release delete-asset repo "$name" -y
           done

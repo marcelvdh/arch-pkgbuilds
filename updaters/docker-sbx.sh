@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Bump docker-sbx's PKGBUILD to the latest version, print it.
+# Bump docker-sbx to the latest upstream version.
 set -euo pipefail
+source "${BASH_SOURCE[0]%/*}/../scripts/lib.sh"
 
-ver="$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/docker/sbx-releases/releases/latest | sed -E 's|.*/v||')"
-exec bash "$(dirname "$0")/../scripts/set-pkgver.sh" "$ver"
+latest="$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/docker/sbx-releases/releases/latest)"
+
+set_pkgver "${latest##*/v}"
