@@ -80,7 +80,7 @@ jobs:
         run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/build.sh"
 
       - name: Publish release
-        timeout-minutes: 30
+        timeout-minutes: 45
         run: |
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             tag="$GITHUB_REF_NAME"
@@ -106,10 +106,12 @@ jobs:
     needs: [discover, release]
     permissions:
       contents: write        # uploads the packages and database
-    if: ${{ !cancelled() && needs.discover.outputs.packages != '[]' }}   # nothing released, nothing to sync
+    # A manual dispatch always resyncs, so the database can be rebuilt from the
+    # existing releases without rebuilding a package.
+    if: ${{ !cancelled() && (needs.discover.outputs.packages != '[]' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     container: archlinux:latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     defaults:
       run:
         shell: bash          # container steps otherwise default to `sh -e {0}`
@@ -148,19 +150,20 @@ jobs:
           done
 
       - name: Publish to rolling release
-        timeout-minutes: 45
+        timeout-minutes: 75
         run: |
           gh release view repo >/dev/null 2>&1 \
             || gh release create repo --latest=false \
                  --title "Pacman repository" \
                  --notes "Rolling release backing the pacman repository — see the README."
-          published="$(gh release view repo --json assets --jq '.assets[] | "\(.name) \(.size)"')"
-          # A package filename is immutable, so re-uploading every package on every
-          # sync is hundreds of megabytes of pointless traffic through the endpoint
-          # that stalls. Send only what the release does not already hold.
+          # `gh release view --json` drops asset digests; the REST payload carries them.
+          published="$(gh api "repos/$GH_REPO/releases/tags/repo" --jq '.assets[] | "\(.name) \(.digest)"')"
+          # Re-uploading every package on every sync is hundreds of megabytes through
+          # the endpoint that stalls. Send only what the release does not already hold,
+          # matched on content so a rebuilt package is never taken for the published one.
           stale=()
           for f in repo/*.pkg.tar.zst; do
-            grep -qxF "$(basename "$f") $(stat -c%s "$f")" <<<"$published" || stale+=("$f")
+            grep -qxF "$(basename "$f") sha256:$(sha256sum "$f" | cut -d' ' -f1)" <<<"$published" || stale+=("$f")
           done
           bash scripts/gh-upload.sh repo "${stale[@]}"                        # packages first...
           bash scripts/gh-upload.sh repo repo/*.pkg.tar.zst.sig repo/arch-pkgbuilds.*   # ...then the database listing them
