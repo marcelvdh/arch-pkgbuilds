@@ -1,24 +1,37 @@
 #!/usr/bin/env bash
-# Upload release assets, retrying when an upload stalls.
-#
-# gh's HTTP client has no timeout, so a connection to uploads.github.com that
-# goes quiet mid-transfer hangs the job until the 6h limit instead of failing.
-# `timeout` turns that stall into a retry; --clobber makes each retry idempotent.
 set -euo pipefail
 
 tag="$1"; shift
-[ "$#" -gt 0 ] || exit 0
+attempts="${GH_UPLOAD_ATTEMPTS:-5}"
+parallel="${GH_UPLOAD_JOBS:-4}"
 
-attempts="${GH_UPLOAD_ATTEMPTS:-4}"
-per_try="${GH_UPLOAD_TIMEOUT:-8m}"
+upload_one() {
+  local f="$1" per_try n
+  per_try="${GH_UPLOAD_TIMEOUT:-$(( $(stat -c%s -- "$f") / 8388608 + 45 ))s}"
+  for n in $(seq 1 "$attempts"); do
+    if timeout -k 30s "$per_try" gh release upload "$tag" "$f" --clobber; then
+      return 0
+    fi
+    echo "::warning::$(basename "$f") -> $tag stalled or failed within $per_try (attempt $n/$attempts)"
+    sleep $((n * 10))   # the endpoint is failing server-side; give it room
+  done
+  echo "::error::$(basename "$f") -> $tag failed after $attempts attempts"
+  return 1
+}
 
-for n in $(seq 1 "$attempts"); do
-  if timeout -k 30s "$per_try" gh release upload "$tag" "$@" --clobber; then
-    exit 0
+failed=0
+running=0
+for f in "$@"; do
+  upload_one "$f" &
+  running=$((running + 1))
+  if [ "$running" -ge "$parallel" ]; then
+    wait -n || failed=1
+    running=$((running - 1))
   fi
-  echo "::warning::upload to $tag stalled or failed (attempt $n/$attempts)"
-  sleep $((n * 30))   # the endpoint is failing server-side; give it room
+done
+while [ "$running" -gt 0 ]; do
+  wait -n || failed=1
+  running=$((running - 1))
 done
 
-echo "::error::upload to $tag failed after $attempts attempts"
-exit 1
+exit "$failed"
