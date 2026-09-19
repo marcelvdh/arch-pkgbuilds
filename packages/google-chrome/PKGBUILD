@@ -1,7 +1,7 @@
 # Forked from the AUR google-chrome package: https://aur.archlinux.org/packages/google-chrome
 
 pkgname=google-chrome
-pkgver=153.0.8010.47
+pkgver=153.0.8010.52
 pkgrel=1
 pkgdesc="The popular web browser by Google (Stable Channel)"
 arch=(
@@ -33,8 +33,8 @@ source=('eula_text.html'
         "google-chrome-$_channel.sh")
 sha256sums=('e93c01576427cad9099f2cf0df0be70d0a2cc0a3a66c743318b2138aa7c4ed93'
             '04e973a4c359a87ef63871ec8726e08fabe9919c60f972d5ca6f56f80a2939ed')
-sha256sums_x86_64=('a326defde54de2f1c0d46d8bf4b6b5f3f76f0c897bd30b20b025097139a05bde')
-sha256sums_aarch64=('0c4c957f4833d9a6f81e4c335c4129c28c0f9877e1e52036fd762eca0adf4db2')
+sha256sums_x86_64=('29e0e4b5af01213915ffdb7f4e49a11956dc5fc591165c85af8688dcdff907ac')
+sha256sums_aarch64=('e5a1d646af594568941e3a61e7b8eddc693f769b7f166874c71f72c9cb806165')
 
 source_x86_64=("https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-${_channel}/google-chrome-${_channel}_${pkgver}-1_amd64.deb")
 source_aarch64=("https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-${_channel}/google-chrome-${_channel}_${pkgver}-1_arm64.deb")
