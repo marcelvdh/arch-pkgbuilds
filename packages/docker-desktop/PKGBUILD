@@ -1,8 +1,8 @@
 # Forked from the AUR docker-desktop package: https://aur.archlinux.org/packages/docker-desktop
 
 pkgname=docker-desktop
-pkgver=4.91.0
-_revision=239619
+pkgver=4.92.0
+_revision=240144
 pkgrel=1
 pkgdesc="Docker Desktop is an easy-to-install application that enables you to locally build and share containerized applications and microservices."
 arch=('x86_64')
@@ -16,7 +16,7 @@ install='docker-desktop.install'
 source=('docker-agreement.txt'
         "$pkgname-$pkgver-x86_64.tar.zst::https://desktop.docker.com/linux/main/amd64/$_revision/$pkgname-x86_64.pkg.tar.zst")
 sha256sums=('888694f4412e253e2dbf2ca4612a43e7d833407282296c14d980735151b639de'
-            'ae93f42d4b096a0c71c2ca4263a2005de850f2af220d011150b9031dcb586bde')
+            '6a0bcffc6fcdc6010bed2927918027440fc8f0034da23d6fbc49838ac94608e7')
 
 package() {
     cp -r "${srcdir}/opt" "${pkgdir}"
