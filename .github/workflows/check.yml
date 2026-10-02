@@ -39,6 +39,15 @@ jobs:
           fi
           echo "packages=$list" >> "$GITHUB_OUTPUT"
 
+  policy:
+    if: github.event.pull_request.user.type == 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash <(git show "origin/$GITHUB_BASE_REF:scripts/check-bump.sh") "origin/$GITHUB_BASE_REF"
+
   build:
     needs: discover
     if: needs.discover.outputs.packages != '[]'
@@ -63,3 +72,11 @@ jobs:
       - name: Build and lint
         working-directory: packages/${{ matrix.package }}
         run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/build.sh"
+
+  result:                                  # the one check the main ruleset requires
+    needs: [discover, policy, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

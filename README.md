@@ -62,7 +62,7 @@ matter of adding a folder.
 
 | Workflow | Runs on | Does |
 |---|---|---|
-| `update.yml` | nightly at 23:00 UTC, or by hand | opens a version-bump PR per package that has a newer upstream release |
+| `update.yml` | nightly at 23:00 UTC, or by hand | opens a version-bump PR per package that has a newer upstream release; it merges itself once checked |
 | `check.yml` | pull requests, pushes to `main` | builds the affected packages to prove they still compile; publishes nothing |
 | `release.yml` | pushes to `main`, tags `<name>/v*`, or by hand | publishes packages and refreshes the pacman repo |
 
@@ -74,15 +74,28 @@ compiled, released or served on a checksum nobody cross-checked.
 
 For each package with an updater: run it, and stop if `pkgver` did not move.
 Otherwise `updpkgsums`, run the verifier, and open a PR from branch
-`autoupdate/<name>-<version>` containing the single changed PKGBUILD. The
-commit is made through the GitHub API with a GitHub App token
-(`UPDATER_APP_ID`, `UPDATER_APP_PRIVATE_KEY`), which gets it signed and lets
-the PR's checks start without manual approval — a PR from
-`github-actions[bot]` would sit waiting as a first-time contributor. A failed
-run opens an issue titled `Update failed: <name> on <date>`, once.
+`autoupdate/<name>` containing the single changed PKGBUILD. The commit is made
+through the GitHub API (blob, tree, commit, then the branch) with a GitHub App
+token (`UPDATER_APP_ID`,
+`UPDATER_APP_PRIVATE_KEY`), which gets it signed and lets the PR's checks
+start without manual approval — a PR from `github-actions[bot]` would sit
+waiting as a first-time contributor. A failed run opens an issue titled
+`Update failed: <name> on <date>`, once.
 
-A closed PR does not block a new one: only an open PR on the same branch does.
-Merged PRs need nothing either, since `main` then carries the version.
+There is one branch per package. A newer version force-updates it and
+retitles the PR, so at most one bump per package waits at a time. The branch
+moves straight from the old bump to the new one: were it reset to `main`
+first, GitHub would close the PR for having no changes. The app
+enables auto-merge on the PR; it merges when `check.yml` passes and stays open
+when it does not. A bump PR is not reviewed by hand: its diff is version and
+checksum lines the verifier already cross-checked, and `check.yml` confirms
+nothing else changed.
+
+This needs the repository settings *Allow auto-merge* and *Automatically
+delete head branches*, and a ruleset on `main` requiring the `result` check
+with a bypass for admins so direct pushes still work. Leave *Require branches
+to be up to date before merging* off: each bump touches a different file, and
+with it on every merge would stall the other open bumps.
 
 ### Check
 
@@ -90,6 +103,13 @@ On a pull request, only the packages whose folders changed are built; if
 anything outside `packages/` changed, everything is. Pushes to `main` that
 touch only a PKGBUILD or Markdown are skipped, because `release.yml` builds
 those.
+
+A PR opened by a bot must also pass `scripts/check-bump.sh`: one PKGBUILD
+changed, and only its `pkgver`, `pkgrel`, `_revision` and `sha256sums` lines.
+The script is taken from the base branch, not the PR, so a PR cannot loosen
+its own check.
+The `result` job reports the outcome of all jobs as the single check the
+`main` ruleset requires.
 
 ### Release
 

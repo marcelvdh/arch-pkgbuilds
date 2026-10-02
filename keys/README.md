@@ -1,7 +1,7 @@
 # Pinned upstream signing keys
 
-Used by `scripts/apt-index.sh` — on behalf of both `updaters/*.sh` and
-`verifiers/*.sh` — to verify signed apt metadata. Only `google-chrome` and
+Used by the signed-apt helpers in `scripts/lib.sh` — on behalf of both
+`updaters/*.sh` and `verifiers/*.sh` — to verify signed apt metadata. Only `google-chrome` and
 `claude-desktop` are distributed this way; the other packages are cross-checked
 against unsigned checksum files (see the README).
 

@@ -54,7 +54,8 @@ jobs:
           sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
-      # PRs from github-actions[bot] need approving by hand before their checks run.
+      # PRs from github-actions[bot] need approving by hand before their checks run,
+      # and github.token cannot enable auto-merge.
       - name: Mint app token
         id: token
         if: steps.up.outputs.new != ''
@@ -62,6 +63,8 @@ jobs:
         with:
           app-id: ${{ secrets.UPDATER_APP_ID }}
           private-key: ${{ secrets.UPDATER_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Open pull request
         if: steps.up.outputs.new != ''
@@ -69,19 +72,32 @@ jobs:
           new: ${{ steps.up.outputs.new }}
           GH_TOKEN: ${{ steps.token.outputs.token }}
         run: |
-          branch="autoupdate/$pkg-$new"
-          if gh pr list --head "$branch" --state open | grep -q .; then
-            echo "An open PR for $branch already exists; skipping."
+          branch="autoupdate/$pkg"
+          title="Update $pkg to $new"
+          if gh pr list --head "$branch" --state open --json title --jq '.[].title' | grep -qxF "$title"; then
+            echo "An open PR for $title already exists; skipping."
             exit 0
           fi
-          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/heads/$branch" -f sha="$GITHUB_SHA" \
-            || gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" -f sha="$GITHUB_SHA" -F force=true
-          # Commit through the API instead of git push so GitHub signs it
-          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/packages/$pkg/PKGBUILD" \
-            -f branch="$branch" -f message="Update $pkg to $new" \
-            -f sha="$(git rev-parse "HEAD:packages/$pkg/PKGBUILD")" \
-            -f content="$(base64 -w0 "packages/$pkg/PKGBUILD")"
-          gh pr create --base main --head "$branch" --title "Update $pkg to $new" --body "Update $pkg to $new."
+          # Commit through the API instead of git push so GitHub signs it.
+          api="repos/$GITHUB_REPOSITORY/git"
+          blob="$(gh api "$api/blobs" -f encoding=base64 \
+            -f content="$(base64 -w0 "packages/$pkg/PKGBUILD")" --jq .sha)"
+          tree="$(gh api "$api/trees" -f base_tree="$GITHUB_SHA" \
+            -f "tree[][path]=packages/$pkg/PKGBUILD" -f 'tree[][mode]=100644' \
+            -f 'tree[][type]=blob' -f "tree[][sha]=$blob" --jq .sha)"
+          commit="$(gh api "$api/commits" -f message="$title" -f tree="$tree" \
+            -f "parents[]=$GITHUB_SHA" --jq .sha)"
+          # One branch per package: a newer version replaces the one still waiting.
+          # Move it in one step; a branch briefly equal to main would close its PR.
+          gh api "$api/refs" -f ref="refs/heads/$branch" -f sha="$commit" \
+            || gh api -X PATCH "$api/refs/heads/$branch" -f sha="$commit" -F force=true
+          if gh pr list --head "$branch" --state open | grep -q .; then
+            gh pr edit "$branch" --title "$title" --body "$title."
+          else
+            gh pr create --base main --head "$branch" --title "$title" --body "$title."
+          fi
+          # Merges once check.yml's `result` passes; merges at once if it already has.
+          gh pr merge "$branch" --auto --merge
 
       - name: Report failure
         if: failure()
