@@ -64,10 +64,11 @@ matter of adding a folder.
 |---|---|---|
 | `update.yml` | nightly at 23:00 UTC, or by hand | opens a version-bump PR per package that has a newer upstream release; it merges itself once checked |
 | `check.yml` | pull requests, pushes to `main` | builds the affected packages to prove they still compile; publishes nothing |
-| `release.yml` | pushes to `main`, tags `<name>/v*`, or by hand | publishes packages and refreshes the pacman repo |
+| `release.yml` | pushes to `main` that change a PKGBUILD, tags `<name>/v*`, or by hand | publishes packages |
+| `repo.yml` | each finished `release.yml` run, or by hand | rebuilds the pacman repo from the releases |
 
-All three run in an `archlinux:latest` container as an unprivileged `builder`
-user, and all three run the package's verifier before building, so nothing is
+All four run in an `archlinux:latest` container as an unprivileged `builder`
+user, and the three that build run the package's verifier before building, so nothing is
 compiled, released or served on a checksum nobody cross-checked.
 
 ### Nightly update
@@ -113,16 +114,21 @@ The `result` job reports the outcome of all jobs as the single check the
 
 ### Release
 
-`release.yml` does not look at what a push changed. It asks which packages have
-no release for their current `pkgver` (`scripts/unreleased.sh`) and publishes
-those, so a release that failed or never ran happens on the next push to
-`main`. Per package: verify, build, create tag `<name>/v<pkgver>`, create the
-release, upload the `.pkg.tar.zst`.
+On a push to `main`, `release.yml` publishes the packages whose PKGBUILD the
+push changed, so a run named after a bump PR builds that package and nothing
+else; a `pkgrel` bump ships the same way. Runs queue per package, so bumps of
+different packages merged together release side by side. Per package: verify,
+build, create tag `<name>/v<pkgver>`, create the release, upload the
+`.pkg.tar.zst`.
 
-The `repo` job then rebuilds the pacman repository from scratch: download every
-package's current release, sign each with the repository key (`SIGNING_KEY`),
-`repo-add --sign`, and upload the lot to the rolling `repo` release. It refuses
-to publish a database that references a package with no release.
+When a release run finishes, `repo.yml` rebuilds the pacman repository from
+scratch off the latest `main`: download every package's current release, sign
+each with the repository key (`SIGNING_KEY`), `repo-add --sign`, and upload
+the lot to the rolling `repo` release. Rebuilds queue one at a time; GitHub
+keeps only the newest waiting run and cancels the others, which loses
+nothing since every rebuild covers every package. If a package has no release
+for its `pkgver` yet, the rebuild leaves the database as it is rather than
+publish one without it; that release's own run triggers the next rebuild.
 
 Assets go up through `scripts/gh-upload.sh`. `gh` has no HTTP timeout, so a
 connection to `uploads.github.com` that goes quiet mid-transfer would hang the
@@ -133,9 +139,9 @@ sporadic `HTTP 500`s. `GH_UPLOAD_ATTEMPTS`, `GH_UPLOAD_JOBS` and
 `GH_UPLOAD_TIMEOUT` override the defaults.
 
 To release by hand, push a tag or run the workflow from the Actions tab: blank
-publishes whatever has no release yet, `all` republishes everything, a name
-republishes that one — which is also how a `pkgrel`-only change ships, since
-the tag already exists.
+publishes whatever has no release yet (the way to catch up after a failed
+release), `all` republishes everything, a name republishes that one. Running
+`repo.yml` by hand rebuilds the database without building anything.
 
 ```sh
 git tag google-chrome/v151.0.7922.169
