@@ -80,8 +80,8 @@ through the GitHub API (blob, tree, commit, then the branch) with a GitHub App
 token (`UPDATER_APP_ID`,
 `UPDATER_APP_PRIVATE_KEY`), which gets it signed and lets the PR's checks
 start without manual approval — a PR from `github-actions[bot]` would sit
-waiting as a first-time contributor. A failed run opens an issue titled
-`Update failed: <name> on <date>`, once.
+waiting as a first-time contributor. A failed run is reported by GitHub's
+own email for failed scheduled workflows; issues are disabled on this repo.
 
 There is one branch per package. A newer version force-updates it and
 retitles the PR, so at most one bump per package waits at a time. The branch

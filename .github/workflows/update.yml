@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  issues: write        # only for "Report failure"; the app token opens the PR
+  contents: read       # the app token opens the PR
 
 jobs:
   discover:
@@ -99,10 +98,3 @@ jobs:
           # Merges once check.yml's `result` passes; merges at once if it already has.
           gh pr merge "$branch" --auto --merge
 
-      - name: Report failure
-        if: failure()
-        run: |
-          title="Update failed: $pkg on $(date -u +%Y-%m-%d)"
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          gh issue list --state open --search "$title in:title" | grep -q . \
-            || gh issue create --title "$title" --body "$run_url"
