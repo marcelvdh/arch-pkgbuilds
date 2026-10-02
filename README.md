@@ -64,12 +64,12 @@ matter of adding a folder.
 |---|---|---|
 | `update.yml` | nightly at 23:00 UTC, or by hand | opens a version-bump PR per package that has a newer upstream release; it merges itself once checked |
 | `check.yml` | pull requests, pushes to `main` | builds the affected packages to prove they still compile; publishes nothing |
-| `release.yml` | pushes to `main` that change a PKGBUILD, tags `<name>/v*`, or by hand | publishes packages |
+| `release.yml` | pushes to `main` that change a PKGBUILD, daily at 11:00 UTC, tags `<name>/v*`, or by hand | publishes packages |
 | `repo.yml` | each finished `release.yml` run, or by hand | rebuilds the pacman repo from the releases |
 
-All four run in an `archlinux:latest` container as an unprivileged `builder`
-user, and the three that build run the package's verifier before building, so nothing is
-compiled, released or served on a checksum nobody cross-checked.
+The jobs that build run in an `archlinux:latest` container as an unprivileged
+`builder` user, and run the package's verifier first, so nothing is compiled,
+released or served on a checksum nobody cross-checked.
 
 ### Nightly update
 
@@ -117,7 +117,9 @@ The `result` job reports the outcome of all jobs as the single check the
 On a push to `main`, `release.yml` publishes the packages whose PKGBUILD the
 push changed, so a run named after a bump PR builds that package and nothing
 else; a `pkgrel` bump ships the same way. Runs queue per package, so bumps of
-different packages merged together release side by side. Per package: verify,
+different packages merged together release side by side. A daily run
+publishes whatever has no release yet, so a failed release is retried and,
+being scheduled, emails the owner when it fails again. Per package: verify,
 build, create tag `<name>/v<pkgver>`, create the release, upload the
 `.pkg.tar.zst`.
 
