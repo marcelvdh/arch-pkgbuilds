@@ -36,13 +36,6 @@ check_sum() {
   echo "$label: PKGBUILD pins the upstream-published sha256"
 }
 
-clearsigned_body() {
-  awk '/^-----BEGIN PGP SIGNED MESSAGE-----$/ {in_armor = 1; next}
-       in_armor && !in_body && /^$/ {in_body = 1; next}
-       /^-----BEGIN PGP SIGNATURE-----$/ {exit}
-       in_body' "$1"
-}
-
 apt_index() (
   local base="$1" suite="$2" arch="$3" key="$4"
   local tmp index published actual
@@ -51,8 +44,8 @@ apt_index() (
 
   curl -fsSL "$base/dists/$suite/InRelease" -o "$tmp/InRelease"
   gpg --dearmor < "$repo_root/keys/$key.asc" > "$tmp/keyring.gpg"
-  gpgv --keyring "$tmp/keyring.gpg" "$tmp/InRelease"
-  clearsigned_body "$tmp/InRelease" > "$tmp/Release"
+  # --output keeps only the bytes the signature covers.
+  gpgv --keyring "$tmp/keyring.gpg" --output "$tmp/Release" "$tmp/InRelease"
 
   index="main/binary-$arch/Packages"
   curl -fsSL "$base/dists/$suite/$index" -o "$tmp/Packages"
