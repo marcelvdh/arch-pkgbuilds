@@ -1,7 +1,7 @@
 # Forked from the AUR docker-sbx package: https://aur.archlinux.org/packages/docker-sbx
 
 pkgname=docker-sbx
-pkgver=0.46.0
+pkgver=0.47.0
 pkgrel=1
 pkgdesc="Docker sandboxes - run AI coding agents in isolated microVM sandboxes"
 arch=('x86_64')
@@ -18,7 +18,7 @@ provides=('sbx')
 conflicts=('sbx')
 options=('!strip' '!debug')
 source=("DockerSandboxes-linux-${pkgver}.tar.gz::https://github.com/docker/sbx-releases/releases/download/v${pkgver}/DockerSandboxes-linux-amd64.tar.gz")
-sha256sums=('edd86e2f21559e190723fd884c3a1dced161a555afdff85c5921ed45e7d6d56e')
+sha256sums=('a89cb4380075ebb20938103bc98ec63327fbeabe43a71f0575ddb285a051eab4')
 
 package() {
     install -Dm755 "$srcdir/docker-sbx/sbx" \
