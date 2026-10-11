@@ -1,0 +1,30 @@
+# Forked from the AUR herdr-bin package: https://aur.archlinux.org/packages/herdr-bin
+
+pkgname=herdr-bin
+pkgver=0.9.3
+pkgrel=1
+pkgdesc="Supervise multiple coding agents in one terminal"
+arch=('x86_64' 'aarch64')
+url="https://github.com/herdrdev/herdr"
+license=('Apache-2.0')
+provides=("herdr=${pkgver}")
+conflicts=('herdr')
+options=('!strip' '!debug')
+source_x86_64=("herdr-${pkgver}-x86_64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-x86_64")
+source_aarch64=("herdr-${pkgver}-aarch64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-aarch64")
+sha256sums_x86_64=('18a8dc65f1c2fa485884344356dea1cfd911c6f06cf46fa78e193f4087f4dba7')
+sha256sums_aarch64=('4de7aa3e25678812e92960de64f7c2aaa1bca1f0f80a3c5e559837e231e1f5c0')
+
+build() {
+	install -m755 "herdr-${pkgver}-${CARCH}" herdr
+	for shell in bash zsh fish; do
+		./herdr completion "$shell" > "herdr.$shell"
+	done
+}
+
+package() {
+	install -Dm755 herdr "${pkgdir}/usr/bin/herdr"
+	install -Dm644 herdr.bash "${pkgdir}/usr/share/bash-completion/completions/herdr"
+	install -Dm644 herdr.zsh "${pkgdir}/usr/share/zsh/site-functions/_herdr"
+	install -Dm644 herdr.fish "${pkgdir}/usr/share/fish/vendor_completions.d/herdr.fish"
+}

@@ -50,7 +50,7 @@ jobs:
           echo "$pkg: $old -> $new"
           git diff --quiet PKGBUILD && { echo "Already up to date."; exit 0; }
           sudo -H -u builder updpkgsums
-          sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
+          sudo -H --preserve-env=GH_TOKEN -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
           echo "new=$new" >> "$GITHUB_OUTPUT"
 
       # PRs from github-actions[bot] need approving by hand before their checks run,

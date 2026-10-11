@@ -15,6 +15,7 @@ release carries the pacman database.
 | `docker-sbx` | forked from AUR |
 | `winbox` | forked from AUR |
 | `jetbrains-toolbox` | forked from AUR |
+| `herdr-bin` | forked from AUR |
 
 ## Install
 
@@ -54,7 +55,7 @@ keys/                upstream apt signing keys, pinned; see keys/README.md
 
 Updaters and verifiers run with the package folder as their working directory
 and source `scripts/lib.sh`, which gives them `pkgbuild`, `set_pkgver`,
-`check_sum` and the signed-apt helpers.
+`check_sum` and the signed-apt helpers. Verifiers also get `GH_TOKEN`, for `gh`.
 
 The workflows discover `packages/*/` on their own, so adding a package is a
 matter of adding a folder.
@@ -159,11 +160,12 @@ git push origin google-chrome/v151.0.7922.169
 |---|---|---|
 | `google-chrome`, `claude-desktop` | apt `InRelease` → `Packages` → `.deb` | yes, against a key pinned in `keys/` |
 | `claude-code`, `docker-desktop`, `docker-sbx`, `winbox`, `jetbrains-toolbox` | a checksum file next to the artifact | no |
+| `herdr-bin` | GitHub's release attestation for the tag, via `gh release verify-asset` | yes, by GitHub's Sigstore instance |
 
 The unsigned checks catch a corrupt download and `updpkgsums` hashing
 something other than what upstream shipped. They do not defend against a
 compromised CDN or publisher: whoever can serve a bad artifact can serve a
-matching hash. Only the signed apt path does that.
+matching hash. Only the signed paths do that.
 
 Keys in `keys/` are vendored byte-for-byte from the URL each vendor's own
 documentation points at, never from a key server.

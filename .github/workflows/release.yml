@@ -85,7 +85,7 @@ jobs:
 
       - name: Verify upstream checksums
         working-directory: packages/${{ matrix.package }}
-        run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
+        run: sudo -H --preserve-env=GH_TOKEN -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
 
       - name: Build
         working-directory: packages/${{ matrix.package }}

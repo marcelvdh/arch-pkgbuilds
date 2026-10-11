@@ -57,6 +57,8 @@ jobs:
       fail-fast: false
       matrix:
         package: ${{ fromJSON(needs.discover.outputs.packages) }}
+    env:
+      GH_TOKEN: ${{ github.token }}      # the verifiers that call gh need it
     steps:
       - name: Install git                # checkout and the setup action need it
         run: pacman -Syu --noconfirm --needed git
@@ -67,7 +69,7 @@ jobs:
 
       - name: Verify upstream checksums
         working-directory: packages/${{ matrix.package }}
-        run: sudo -H -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
+        run: sudo -H --preserve-env=GH_TOKEN -u builder bash "$GITHUB_WORKSPACE/scripts/verify.sh"
 
       - name: Build and lint
         working-directory: packages/${{ matrix.package }}
