@@ -14,6 +14,7 @@ release carries the pacman database.
 | `docker-desktop` | forked from AUR |
 | `docker-sbx` | forked from AUR |
 | `winbox` | forked from AUR |
+| `jetbrains-toolbox` | forked from AUR |
 
 ## Install
 
@@ -157,7 +158,7 @@ git push origin google-chrome/v151.0.7922.169
 | Package | Cross-checked against | Signed? |
 |---|---|---|
 | `google-chrome`, `claude-desktop` | apt `InRelease` → `Packages` → `.deb` | yes, against a key pinned in `keys/` |
-| `claude-code`, `docker-desktop`, `docker-sbx`, `winbox` | a checksum file next to the artifact | no |
+| `claude-code`, `docker-desktop`, `docker-sbx`, `winbox`, `jetbrains-toolbox` | a checksum file next to the artifact | no |
 
 The unsigned checks catch a corrupt download and `updpkgsums` hashing
 something other than what upstream shipped. They do not defend against a

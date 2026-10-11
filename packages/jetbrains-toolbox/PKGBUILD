@@ -1,0 +1,39 @@
+# Forked from the AUR jetbrains-toolbox package: https://aur.archlinux.org/packages/jetbrains-toolbox
+
+pkgname=jetbrains-toolbox
+pkgver=3.8.1.88030
+pkgrel=1
+pkgdesc='Manage all your JetBrains Projects and Tools'
+arch=('x86_64')
+url='https://www.jetbrains.com/toolbox/'
+license=('custom:jetbrains')
+depends=(
+  glib2
+  libxslt
+  libxss
+  nss
+  org.freedesktop.secrets
+  xcb-util-keysyms
+  xdg-utils
+)
+options=('!strip' '!debug')
+source=("https://download.jetbrains.com/toolbox/${pkgname}-${pkgver}.tar.gz"
+        LICENSE)
+sha256sums=('25cbe2ad027f5a5749bf8d8ae7c2215a8665403cfe94ff5d05cd48b25daac345'
+            'c37db68dbedb20617a23cf1299cd95e7f114f019ff7f44877409cef916ff6ab1')
+
+package() {
+  local bin="${srcdir}"/${pkgname}-${pkgver}/bin
+
+  install -dm755 "${pkgdir}"/usr/bin/ "${pkgdir}"/opt/${pkgname}
+  install -Dm644 "${bin}"/${pkgname}.desktop "${pkgdir}"/usr/share/applications/${pkgname}.desktop
+  install -Dm644 "${bin}"/toolbox.svg "${pkgdir}"/usr/share/pixmaps/${pkgname}.svg
+  install -Dm644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE.txt
+
+  sed -i 's|^MimeType=$|MimeType=x-scheme-handler/jetbrains;|' \
+    "${pkgdir}"/usr/share/applications/${pkgname}.desktop
+
+  cp -dr --no-preserve=ownership "${bin}"/* "${pkgdir}"/opt/${pkgname}/
+
+  ln -s /opt/${pkgname}/${pkgname} "${pkgdir}"/usr/bin/${pkgname}
+}
