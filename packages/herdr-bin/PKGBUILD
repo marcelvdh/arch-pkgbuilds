@@ -1,7 +1,7 @@
 # Forked from the AUR herdr-bin package: https://aur.archlinux.org/packages/herdr-bin
 
 pkgname=herdr-bin
-pkgver=0.9.4
+pkgver=0.9.5
 pkgrel=1
 pkgdesc="Supervise multiple coding agents in one terminal"
 arch=('x86_64' 'aarch64')
@@ -12,8 +12,8 @@ conflicts=('herdr')
 options=('!strip' '!debug')
 source_x86_64=("herdr-${pkgver}-x86_64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-x86_64")
 source_aarch64=("herdr-${pkgver}-aarch64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-aarch64")
-sha256sums_x86_64=('493304fbefb0ed0ea0455f373b47f48d24e8774bc7974f4c916ad2e937675b23')
-sha256sums_aarch64=('9511cb70982c1ef115f232058e7ed7cf9640aa5a2c0ca78934cefda3aeb093fd')
+sha256sums_x86_64=('14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d')
+sha256sums_aarch64=('17d7536f2da50859523680ef279dffcac8e4a235f4e46fe8da6c2ec44141897c')
 
 build() {
 	install -m755 "herdr-${pkgver}-${CARCH}" herdr
