@@ -27,10 +27,7 @@ set_pkgver() {
 
 check_sum() {
   local label="$1" want="$2"
-  if [ -z "$want" ]; then
-    echo "$label: upstream no longer publishes a checksum for this version"
-    return 0
-  fi
+  [ -n "$want" ] || die "$label: found no upstream sha256 to compare against"
   [[ "$want" =~ ^[0-9a-f]{64}$ ]] || die "$label: upstream returned a malformed sha256 '$want'"
   grep -qF "$want" PKGBUILD || die "$label: upstream sha256 '$want' not in PKGBUILD"
   echo "$label: PKGBUILD pins the upstream-published sha256"

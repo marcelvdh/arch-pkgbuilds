@@ -170,9 +170,14 @@ matching hash. Only the signed paths do that.
 Keys in `keys/` are vendored byte-for-byte from the URL each vendor's own
 documentation points at, never from a key server.
 
-An apt index only lists the current version. A verifier that finds no checksum
-for the pinned version reports a superseded release and passes; a signature or
-network failure fails hard.
+Finding no checksum fails the verifier. The two apt paths are the exception,
+and say so themselves: an apt index lists only the current version, so a
+missing entry there means the pinned release was superseded rather than that
+the check broke, and those two verifiers exit 0 on that case alone. Everywhere
+else an empty result means the lookup failed — an artifact renamed upstream, a
+manifest that stopped listing it — and `check_sum` refuses it, because a check
+that silently finds nothing to compare against is worse than no check at all.
+A signature or network failure fails hard.
 
 ## Add a package
 
