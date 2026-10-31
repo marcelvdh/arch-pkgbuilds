@@ -1,7 +1,7 @@
 # Forked from the AUR jetbrains-toolbox package: https://aur.archlinux.org/packages/jetbrains-toolbox
 
 pkgname=jetbrains-toolbox
-pkgver=3.9.0.88839
+pkgver=3.9.1.89198
 pkgrel=1
 pkgdesc='Manage all your JetBrains Projects and Tools'
 arch=('x86_64')
@@ -19,7 +19,7 @@ depends=(
 options=('!strip' '!debug')
 source=("https://download.jetbrains.com/toolbox/${pkgname}-${pkgver}.tar.gz"
         LICENSE)
-sha256sums=('e578d49627da13a6e196e234bfb6325db02a64a07fd22414909daae378ab4049'
+sha256sums=('43add3c33c9b86ee560adc8579261e8e26465a101b281720937c6d1d4967b3e4'
             'c37db68dbedb20617a23cf1299cd95e7f114f019ff7f44877409cef916ff6ab1')
 
 package() {
