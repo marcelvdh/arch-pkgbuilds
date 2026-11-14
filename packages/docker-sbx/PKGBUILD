@@ -2,7 +2,7 @@
 
 pkgname=docker-sbx
 pkgver=0.53.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Docker sandboxes - run AI coding agents in isolated microVM sandboxes"
 arch=('x86_64')
 url="https://docs.docker.com/ai/sandboxes/"
@@ -36,7 +36,11 @@ package() {
         "$pkgdir/usr/libexec/nerdbox-rootfs-x86_64.erofs"
     install -Dm755 "$srcdir/docker-sbx/libsailor.so" \
         "$pkgdir/usr/libexec/lib/libsailor.so"
-
+    install -Dm755 "$srcdir/docker-sbx/docker-docklet" \
+        "$pkgdir/usr/libexec/docker-docklet"
+    for f in "$srcdir"/docker-sbx/sailor-rootfs-*.erofs; do
+        install -Dm644 "$f" "$pkgdir/usr/libexec/$(basename "$f")"
+    done
     install -Dm644 "$srcdir/docker-sbx/apparmor-profile" \
         "$pkgdir/etc/apparmor.d/docker-sbx-nerdbox-shim"
 
